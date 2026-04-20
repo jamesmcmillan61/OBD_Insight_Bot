@@ -1,0 +1,262 @@
+﻿@model OBDInsightBot.Models.UserOBDData
+
+@{
+    Layout = "_ChatLayout";
+    ViewData["Title"] = "Manual OBD Data Entry";
+}
+
+<style>
+    .form-control {
+        background-color: #1a1a1a;
+        color: #ffffff;
+        width: 300px;
+        border: 1px solid #333;
+    }
+
+        .form-control::placeholder {
+            color: #888;
+        }
+
+        .form-control:focus {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            border-color: #0f62fe;
+            box-shadow: none;
+        }
+
+    .form-group {
+        margin-bottom: 14px;
+    }
+
+    .two-column {
+        display: flex;
+        gap: 30px; /* exact 30px gap between columns */
+    }
+
+    .column {
+        display: flex;
+        flex-direction: column;
+    }
+
+    details {
+        margin-bottom: 15px;
+    }
+</style>
+
+<h2>Enter Your Vehicle OBD Data</h2>
+<p>You may leave any field blank if you do not know the value.</p>
+
+<form asp-action="ManualEntrySubmit" method="post">
+    <input type="hidden" name="SessionID" value="@ViewBag.SelectedSessionID" />
+
+    <h3>Vehicle Information</h3>
+    <div class="two-column">
+        <div class="column">
+            <div class="form-group">
+                <label>Make</label>
+                <input asp-for="Mark" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Year</label>
+                <input asp-for="CarYear" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Transmission (Automatic/Manual)</label>
+                <input asp-for="Automatic" class="form-control" />
+            </div>
+        </div>
+        <div class="column">
+            <div class="form-group">
+                <label>Model</label>
+                <input asp-for="Model" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Engine Power</label>
+                <input asp-for="EnginePower" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Vehicle ID / VIN</label>
+                <input asp-for="VehicleId" class="form-control" />
+            </div>
+        </div>
+    </div>
+
+    <h3>Engine Data</h3>
+    <div class="two-column">
+        <div class="column">
+            <div class="form-group">
+                <label>Engine RPM</label>
+                <input asp-for="EngineRpm" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Engine Coolant Temperature</label>
+                <input asp-for="EngineCoolantTemp" class="form-control" />
+            </div>
+        </div>
+        <div class="column">
+            <div class="form-group">
+                <label>Engine Load (%)</label>
+                <input asp-for="EngineLoad" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Engine Runtime</label>
+                <input asp-for="EngineRuntime" class="form-control" />
+            </div>
+        </div>
+    </div>
+
+    <h3>Fuel System</h3>
+    <div class="two-column">
+        <div class="column">
+            <div class="form-group">
+                <label>Fuel Type</label>
+                <input asp-for="FuelType" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Fuel Pressure</label>
+                <input asp-for="FuelPressure" class="form-control" />
+            </div>
+        </div>
+        <div class="column">
+            <div class="form-group">
+                <label>Fuel Level (%)</label>
+                <input asp-for="FuelLevel" class="form-control" />
+            </div>
+        </div>
+    </div>
+
+    <h3>Driving Data</h3>
+    <div class="two-column">
+        <div class="column">
+            <div class="form-group">
+                <label>Speed</label>
+                <input asp-for="Speed" class="form-control" />
+            </div>
+        </div>
+        <div class="column">
+            <div class="form-group">
+                <label>Throttle Position</label>
+                <input asp-for="ThrottlePos" class="form-control" />
+            </div>
+        </div>
+    </div>
+
+    <h3>Diagnostics</h3>
+    <div class="two-column">
+        <div class="column">
+            <div class="form-group">
+                <label>DTC Number</label>
+                <input asp-for="DtcNumber" class="form-control" />
+            </div>
+        </div>
+        <div class="column">
+            <div class="form-group">
+                <label>Trouble Codes (Example: P0171, P0300)</label>
+                <input asp-for="TroubleCodes" class="form-control" />
+            </div>
+        </div>
+    </div>
+
+    <details>
+        <summary><strong>Advanced Sensors</strong></summary>
+        <div class="two-column">
+            <div class="column">
+                <div class="form-group">
+                    <label>Barometric Pressure (kPa)</label>
+                    <input asp-for="BarometricPressureKpa" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Ambient Air Temperature</label>
+                    <input asp-for="AmbientAirTemp" class="form-control" />
+                </div>
+            </div>
+            <div class="column">
+                <div class="form-group">
+                    <label>Air Intake Temperature</label>
+                    <input asp-for="AirIntakeTemp" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Intake Manifold Pressure</label>
+                    <input asp-for="IntakeManifoldPressure" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Mass Air Flow (MAF)</label>
+                    <input asp-for="Maf" class="form-control" />
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary><strong>Fuel Trim Data</strong></summary>
+        <div class="two-column">
+            <div class="column">
+                <div class="form-group">
+                    <label>Short Term Fuel Trim Bank 1</label>
+                    <input asp-for="ShortTermFuelTrimBank1" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Short Term Fuel Trim Bank 2</label>
+                    <input asp-for="ShortTermFuelTrimBank2" class="form-control" />
+                </div>
+            </div>
+            <div class="column">
+                <div class="form-group">
+                    <label>Long Term Fuel Trim Bank 2</label>
+                    <input asp-for="LongTermFuelTrimBank2" class="form-control" />
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary><strong>Advanced Engine Data</strong></summary>
+        <div class="two-column">
+            <div class="column">
+                <div class="form-group">
+                    <label>Timing Advance</label>
+                    <input asp-for="TimingAdvance" class="form-control" />
+                </div>
+            </div>
+            <div class="column">
+                <div class="form-group">
+                    <label>Equivalence Ratio</label>
+                    <input asp-for="EquivRatio" class="form-control" />
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary><strong>Timestamp Information</strong></summary>
+        <div class="two-column">
+            <div class="column">
+                <div class="form-group">
+                    <label>Hour</label>
+                    <input asp-for="Hours" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Minute</label>
+                    <input asp-for="Min" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Day Of Week</label>
+                    <input asp-for="DaysOfWeek" class="form-control" />
+                </div>
+            </div>
+            <div class="column">
+                <div class="form-group">
+                    <label>Month</label>
+                    <input asp-for="Months" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Year</label>
+                    <input asp-for="Year" class="form-control" />
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <br />
+    <button type="submit" class="btn btn-primary">Submit OBD Data</button>
+</form>

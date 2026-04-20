@@ -1,0 +1,729 @@
+﻿@model UserSession
+@{
+    List<UserChatItem> userChats = ViewBag.UsersChats as List<UserChatItem> ?? new();
+    List<string> Questions = ViewBag.Questions as List<string> ?? new List<string>();
+
+    @if (Questions.Count != 3)
+    {
+        Questions.Add("Are there any error codes?");
+        Questions.Add("What is my fuel level at?");
+        Questions.Add("How is my car doing?");
+    }
+
+    int uploadedFileCount = ViewBag.UploadedFileCount ?? 0;
+    Layout = "_ChatLayout";
+}
+
+<div class="chat-container">
+
+    <!-- Context banner -->
+    @if (uploadedFileCount > 0)
+    {
+        <div class="context-banner">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-car-front-fill text-secondary"></i>
+                <span class="text-secondary small">
+                    @uploadedFileCount file(s) uploaded
+                </span>
+            </div>
+        </div>
+    }
+
+    <!-- Messages -->
+    <div class="chat-messages">
+
+        <!-- Initial greeting -->
+        @if (!userChats.Any())
+        {
+            <div class="message-row bot-row">
+                <div class="bot-avatar">
+                    <i class="bi bi-robot"></i>
+                </div>
+                <div class="message-bubble bot-bubble">
+                    How may I assist you today?
+                </div>
+            </div>
+        }
+
+        <div class="message-row bot-row d-none" id="thinkingIndicator">
+            <div class="bot-avatar">
+                <i class="bi bi-robot"></i>
+            </div>
+            <div class="message-bubble bot-bubble">
+                <span class="thinking-dots">Thinking<span>.</span><span>.</span><span>.</span></span>
+            </div>
+        </div>
+
+        @foreach (var chat in userChats)
+        {
+            if (chat.ItemBy == ChatSender.System)
+            {
+                <div class="text-center text-muted small my-2">
+                    @chat.ChatContent
+                </div>
+            }
+            else if (chat.ItemBy == ChatSender.User)
+            {
+                <div class="message-row user-row">
+                    <div class="message-bubble user-bubble">
+                        @chat.ChatContent
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="message-row bot-row">
+                    <div class="bot-avatar">
+                        <i class="bi bi-robot"></i>
+                    </div>
+                    <div class="message-bubble bot-bubble">
+                        @chat.ChatContent
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+
+    <section style="    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;">
+        <!-- Quick buttons -->
+
+        <div style="width: min(90vw, 80ch); display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; padding-bottom: 10px;">
+
+
+
+
+
+        <form asp-controller="Chat"
+                  asp-action="newChatMessage"
+                  method="post"
+                  class="d-flex align-items-center gap-2"
+                  id="quickChatForm">
+
+            <input type="hidden" name="SessionID" value="@Model.Id" />
+                <input type="hidden" name="SuggestedPrompt" value="true" />
+                @for (int i = 0; i < 3; i++)
+                {
+                    //example-button form-control send-button
+                    <Button class="btn btn-primary" name="message" value="@Questions[i]">
+                        @Questions[i] </Button>
+                }
+
+        </form>
+        </div>
+
+        <!-- Input -->
+
+        <div class="input-container" style="width: min(90vw, 85ch);">
+            <form asp-controller="Chat"
+                  asp-action="newChatMessage"
+                  method="post"
+                  class="d-flex align-items-center gap-2"
+                  id="textChatForm">
+
+                <input type="hidden" name="SessionID" value="@Model.Id" />
+
+                <input type="text"
+                       name="message"
+                       class="form-control chat-input"
+                       placeholder="Ask about your vehicle..."
+                       autocomplete="off"
+                       required />
+
+                <button type="submit" class="icon-btn send-button" id="sendBtn">
+                    <i class="bi bi-send" id="sendIcon"></i>
+                    <output class="spinner-border spinner-border-sm d-none" id="sendSpinner"></output>
+                </button>
+
+                <!-- Menu -->
+                <div class="dropdown">
+                    <button class="icon-btn menu-button"
+                            type="button"
+                            data-bs-toggle="dropdown">
+                        <i class="bi bi-three-dots-vertical"></i>
+                    </button>
+
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item"
+                               asp-controller="Chat"
+                               asp-action="NewChat">
+                                <i class="bi bi-arrow-repeat me-2"></i>
+                                New Chat
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider" /></li>
+                        
+                        <li>
+                            <a class="dropdown-item text-danger"
+                               asp-controller="Chat"
+                               asp-action="RemoveMyData"
+                               asp-route-SessionID="@Model.Id">
+                                <i class="bi bi-trash me-2"></i>
+                                Clear Data
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item text-danger"
+                               asp-controller="Chat"
+                               asp-action="RemoveMyData"
+                               asp-route-SessionID="@Model.Id">
+                                <i class="bi bi-eraser me-2"></i>
+                                Clear Chat
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+        <p class="disclaimer">
+            This application should not be relied upon, always seek professional advice.
+        </p>
+    </section>
+    
+</div>
+
+
+
+<style>
+    /* Make main-content a flex column so chat-container can fill it */
+    .main-content {
+        display: flex;
+        flex-direction: column;
+        padding: 0 !important;
+    }
+
+    .chat-container {
+        flex: 1;
+        min-height: 0; /* required for flex overflow to work */
+        display: flex;
+        flex-direction: column;
+        padding: 1.25rem 1.5rem;
+        max-width: 100%;
+    }
+
+    @@media (max-width: 575px) {
+        .chat-container {
+            padding: 1rem;
+        }
+    }
+
+    .context-banner {
+        padding: 0.75rem 1rem;
+        background-color: var(--bg-elevated, #1a1a1a);
+        border: 1px solid var(--border-color, #2a2a2a);
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        color: var(--text-muted, #a8a8a8);
+    }
+
+    .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 0.5rem 0 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    .message-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .bot-row {
+        justify-content: flex-start;
+    }
+
+    .user-row {
+        justify-content: flex-end;
+    }
+
+    .bot-avatar {
+        background-color: var(--accent-primary, #0f62fe);
+        flex-shrink: 0;
+        border-radius: 50%;
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #ffffff;
+        font-size: 1.25rem;
+    }
+
+    .message-bubble {
+        padding: 1rem 1.25rem;
+        max-width: 70%;
+        line-height: 1.6;
+        font-size: 0.9375rem;
+    }
+
+    .bot-bubble {
+        background-color: var(--bg-surface, #262626);
+        border: 1px solid var(--border-color, #2a2a2a);
+        border-radius: 4px 16px 16px 16px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        color: var(--text-primary, #ffffff);
+    }
+
+    .user-bubble {
+        background-color: var(--accent-primary, #0f62fe);
+        border-radius: 16px 4px 16px 16px;
+        color: #ffffff;
+        box-shadow: 0 2px 6px rgba(15, 98, 254, 0.2);
+    }
+
+    .input-container {
+        background-color: var(--bg-elevated, #1a1a1a);
+        border: 1px solid var(--border-color, #2a2a2a);
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        margin-top: auto;
+        box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .chat-input {
+        flex: 1;
+        border: none;
+        background: transparent !important;
+        font-size: 0.9375rem;
+        color: var(--text-primary, #ffffff) !important;
+        padding: 0.5rem;
+    }
+
+    .chat-input:focus {
+        outline: none;
+        background: transparent !important;
+        box-shadow: none !important;
+        color: var(--text-primary, #ffffff) !important;
+    }
+
+    .chat-input::placeholder {
+        color: var(--text-subtle, #6f6f6f);
+    }
+
+    /* Override Bootstrap form-control styles */
+    .chat-input.form-control,
+    .chat-input.form-control:focus {
+        background-color: transparent !important;
+        border-color: transparent !important;
+        box-shadow: none !important;
+        color: var(--text-primary, #ffffff) !important;
+    }
+
+    .send-button {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        border: none;
+        background-color: var(--accent-primary, #0f62fe);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.15s ease, transform 0.15s ease;
+        cursor: pointer;
+    }
+
+    .send-button:hover:not(:disabled) {
+        background-color: #0353e9;
+        transform: translateY(-1px);
+    }
+
+    .send-button:disabled {
+        background-color: var(--text-subtle, #6f6f6f);
+        cursor: not-allowed;
+    }
+
+    .example-button {
+        flex: 1 0 140px;   /* no shrink — forces wrap instead of squashing */
+        max-width: 240px;
+        min-height: 40px;
+        height: auto;
+        border-radius: 10px;
+        border: 1px solid rgba(15, 98, 254, 0.6);
+        background-color: var(--accent-primary, #0f62fe);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.15s ease, transform 0.15s ease;
+        cursor: pointer;
+        font-size: 0.8125rem;
+        text-align: center;
+        padding: 0.5rem 0.875rem;
+        white-space: normal;
+        line-height: 1.3;
+    }
+
+    .example-button:hover:not(:disabled) {
+        background-color: #0353e9;
+        transform: translateY(-1px);
+    }
+
+    .example-button:disabled {
+        background-color: var(--text-subtle, #6f6f6f);
+        cursor: not-allowed;
+    }
+
+
+
+    .menu-button {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color, #2a2a2a);
+        background-color: var(--bg-elevated, #1a1a1a);
+        color: var(--text-secondary, #c6c6c6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: border-color 0.15s ease, background-color 0.15s ease;
+        cursor: pointer;
+    }
+
+    .menu-button:hover {
+        border-color: var(--accent-primary, #0f62fe);
+        color: var(--accent-primary, #0f62fe);
+    }
+
+    .disclaimer {
+        color: var(--text-subtle, #6f6f6f);
+        text-align: center;
+        font-size: 0.75rem;
+        margin-top: 0.75rem;
+        margin-bottom: 0;
+    }
+
+    /* Thinking animation */
+    .thinking-dots span {
+        animation: blink 1.4s infinite both;
+    }
+    .thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    @@keyframes blink {
+        0%, 80%, 100% { opacity: 0; }
+        40% { opacity: 1; }
+    }
+
+    /* Dropdown menu styling */
+    .dropdown-menu {
+        background-color: var(--bg-elevated, #1a1a1a);
+        border: 1px solid var(--border-color, #2a2a2a);
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        padding: 0.5rem;
+    }
+
+    .dropdown-item {
+        border-radius: 6px;
+        padding: 0.625rem 1rem;
+        font-size: 0.875rem;
+        color: var(--text-primary, #ffffff);
+        transition: background-color 0.15s ease;
+    }
+
+    .dropdown-item:hover {
+        background-color: var(--bg-surface, #262626);
+        color: var(--text-primary, #ffffff);
+    }
+
+    .dropdown-item.text-danger:hover {
+        background-color: rgba(250, 77, 86, 0.1);
+    }
+
+    .dropdown-divider {
+        margin: 0.25rem 0;
+        border-color: var(--border-color, #2a2a2a);
+    }
+
+    /* Light theme overrides */
+    [data-theme="light"] .bot-bubble {
+        background-color: var(--bg-elevated);
+        border-color: var(--border-color);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    }
+
+    [data-theme="light"] .input-container {
+        box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.04);
+    }
+
+    [data-theme="light"] .dropdown-item:hover {
+        background-color: var(--bg-secondary);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const chatMessages = document.querySelector('.chat-messages');
+        const thinkingIndicator = document.getElementById('thinkingIndicator');
+        const sendBtn = document.getElementById('sendBtn');
+        const sendIcon = document.getElementById('sendIcon');
+        const sendSpinner = document.getElementById('sendSpinner');
+        const textInput = document.querySelector('#textChatForm input[name="message"]');
+
+        // Keep thinking indicator anchored at the end of the messages list
+        chatMessages.appendChild(thinkingIndicator);
+
+        function scrollToBottom() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function addUserBubble(text) {
+            const row = document.createElement('div');
+            row.className = 'message-row user-row';
+            row.innerHTML = `<div class="message-bubble user-bubble">${escapeHtml(text)}</div>`;
+            chatMessages.insertBefore(row, thinkingIndicator);
+        }
+
+        function addBotBubble(text) {
+            const row = document.createElement('div');
+            row.className = 'message-row bot-row';
+            row.innerHTML = `<div class="bot-avatar"><i class="bi bi-robot"></i></div><div class="message-bubble bot-bubble">${escapeHtml(text)}</div>`;
+            chatMessages.insertBefore(row, thinkingIndicator);
+        }
+
+        function setLoading(on) {
+            sendBtn.disabled = on;
+            sendIcon.classList.toggle('d-none', on);
+            sendSpinner.classList.toggle('d-none', !on);
+            thinkingIndicator.classList.toggle('d-none', !on);
+            // Disable quick-reply buttons too
+            document.querySelectorAll('#quickChatForm button').forEach(b => b.disabled = on);
+            scrollToBottom();
+        }
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+            const form = e.currentTarget;
+            const formData = new FormData(form);
+
+            // Capture the clicked button's value (needed for quick-reply buttons)
+            if (e.submitter && e.submitter.name) {
+                formData.set(e.submitter.name, e.submitter.value);
+            }
+
+            const message = (formData.get('message') || '').trim();
+            if (!message) return;
+
+            // Show the user message immediately and clear the input
+            addUserBubble(message);
+            if (textInput) textInput.value = '';
+            setLoading(true);
+
+            try {
+                const resp = await fetch(form.action, { method: 'POST', body: formData });
+                if (!resp.ok) throw new Error('Bad response');
+
+                // Parse the returned page and grab the last bot reply
+                const html = await resp.text();
+                const doc = new DOMParser().parseFromString(html, 'text/html');
+                const botBubbles = doc.querySelectorAll('.message-row.bot-row:not(#thinkingIndicator) .bot-bubble');
+                const lastReply = botBubbles[botBubbles.length - 1];
+
+                addBotBubble(lastReply ? lastReply.textContent.trim() : "Sorry, I couldn't get a response. Please try again.");
+            } catch {
+                addBotBubble("Sorry, something went wrong. Please try again.");
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        document.getElementById('quickChatForm').addEventListener('submit', handleSubmit);
+        document.getElementById('textChatForm').addEventListener('submit', handleSubmit);
+    });
+</script>
+
+
+@* @model UserSession
+@{
+    List<UserChatItem> userChats = ViewBag.UsersChats as List<UserChatItem> ?? new List<UserChatItem>();
+    Layout = "_ChatLayout";
+}
+
+<div class="chat-shell d-flex flex-column h-100">
+
+    <!-- Messages -->
+    <div class="chat-messages flex-grow-1 pe-2">
+        @foreach (var uci in userChats)
+        {
+            if (uci.ItemBy == ChatSender.User)
+            {
+                <div class="d-flex justify-content-end mb-3">
+                    <div class="chat-bubble user-bubble">
+                        @uci.ChatContent
+                    </div>
+                </div>
+            }
+            else if (uci.ItemBy == ChatSender.System)
+            {
+                <div class="text-center mb-3 text-muted small">
+                    @uci.ChatContent
+                </div>
+            }
+            else
+            {
+                <div class="d-flex justify-content-start mb-3">
+                    <div class="chat-bubble bot-bubble">
+                        @uci.ChatContent
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <!-- Suggestions -->
+    @if (userChats.Count == 1)
+    {
+        <form asp-controller="Chat" asp-action="newChatMessage" method="post" class="suggestions-row">
+            <input type="hidden" name="SessionID" value="@Model.Id" />
+            <input type="hidden" name="message" value="Please provide me with an overview of my vehicle data." />
+
+            <button type="submit" class="suggestion-chip">
+                💡 Give me an overview of my vehicle’s health
+            </button>
+        </form>
+    }
+
+    <!-- Input -->
+    <div class="chat-input-bar">
+        <form asp-controller="Chat" asp-action="newChatMessage" method="post" class="d-flex gap-2">
+            <input type="hidden" name="SessionID" value="@Model.Id" />
+
+            <input type="text"
+                   name="message"
+                   class="chat-input"
+                   placeholder="What's your question?"
+                   autocomplete="off"
+                   required />
+
+            <button type="submit" class="send-btn">Send</button>
+        </form>
+
+        <p class="disclaimer">
+            This application should not be relied upon, always seek professional advice
+        </p>
+    </div>
+</div>
+
+
+<style>
+    .chat-shell {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        
+    }
+
+    /* Messages */
+    .chat-messages {
+        overflow-y: auto;
+        padding-right: 6px;
+    }
+
+    /* Bubbles */
+    .chat-bubble {
+        padding: 14px 18px;
+        border-radius: 18px;
+        max-width: 65%;
+        line-height: 1.4;
+        font-size: 0.9rem;
+    }
+
+    .user-bubble {
+        background: #3b82f6;
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
+
+    .bot-bubble {
+        background: #334155;
+        color: #e5e7eb;
+        border-bottom-left-radius: 4px;
+    }
+
+    /* Suggestions */
+    .suggestions-row {
+        display: flex;
+        gap: 12px;
+        padding: 12px 0;
+    }
+
+    .suggestion-chip {
+        background: #475569;
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 14px;
+        font-size: 0.85rem;
+        transition: background 0.2s ease;
+    }
+
+        .suggestion-chip:hover {
+            background: #64748b;
+        }
+
+    /* Input bar */
+    .chat-input-bar {
+        margin-top: auto;
+        padding-top: 12px;
+    }
+
+    .chat-input {
+        flex: 1;
+        background: #334155;
+        border: none;
+        border-radius: 14px;
+        padding: 12px 14px;
+        color: white;
+    }
+
+        .chat-input::placeholder {
+            color: #94a3b8;
+        }
+
+    .send-btn {
+        background: #93c5fd;
+        border: none;
+        border-radius: 14px;
+        padding: 0 22px;
+        font-weight: 600;
+    }
+
+        .send-btn:hover {
+            background: #bfdbfe;
+        }
+
+    /* Disclaimer */
+    .disclaimer {
+        margin-top: 10px;
+        font-size: 0.7rem;
+        text-align: center;
+        color: #9ca3af;
+    }
+
+    /* Scrollbar */
+    .chat-messages::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .chat-messages::-webkit-scrollbar-thumb {
+        background: #334155;
+        border-radius: 3px;
+    }
+
+
+</style> *@

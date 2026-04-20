@@ -1,0 +1,172 @@
+﻿@model OBDInsightBot.Models.BlogPost
+
+@{
+    ViewData["Title"] = Model?.Title ?? "Blog Details";
+    Layout = "_HomeLayout";
+
+    List<BlogItem> blogItems = ViewBag.thisBlogItems as List<BlogItem> ?? new();
+    blogItems = blogItems.OrderBy(x => x.PositionInBlog).ToList();
+
+    string written = Model.WrittenAt.ToLocalTime().ToString("dd MMM yyyy");
+    string posted = Model.PostedAt.ToLocalTime().ToString("dd MMM yyyy");
+}
+<style>
+.content-list {
+    margin-top: 1rem;
+}
+
+.content-row {
+    display: flex;
+    align-items: flex-start;
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-color-strong);
+    border-radius: 10px;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.content-row:hover {
+    border-color: var(--accent-primary);
+}
+
+.type-badge {
+    min-width: 50px;
+    padding: 6px 12px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-align: center;
+    background-color: rgba(15, 98, 254, 0.15);
+    border: 1px solid rgba(15, 98, 254, 0.3);
+    border-radius: 6px;
+    color: #0f62fe;
+    text-transform: uppercase;
+}
+
+.content-preview {
+    color: var(--text-primary);
+    white-space: normal;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.icon-btn i {
+    font-size: 20px;
+    color: var(--text-primary);
+    opacity: 0.75;
+}
+
+.icon-btn:hover i {
+    opacity: 1;
+}
+
+</style>
+
+<section class="container py-5">
+
+    <!-- Header -->
+    <div class="mb-4">
+        <span class="accent-line"></span>
+        <h1 class="text-heading mb-2">@Model.Title</h1>
+        <p class="text-body-lg">@Model.MiniDescription</p>
+        <small class="text-muted">Written: @written • Posted: @posted</small>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="mb-4 d-flex justify-content-between">
+        <a asp-action="BlogsControl" class="btn-premium btn-premium-outline">← Back to Blog List</a>
+        <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn-premium btn-premium-primary">
+            ✎ Edit Headline
+        </a>
+    </div>
+
+    <!-- Unified Card -->
+    <div class="card-premium p-4">
+
+        <!-- Content List Header -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="text-subheading mb-0">Blog Content Items</h3>
+
+            <a asp-action="AddBlogItem"
+               asp-route-BlogID="@Model?.Id"
+               class="btn-premium btn-premium-primary btn-sm">
+                + Add Item
+            </a>
+        </div>
+
+        <!-- Blog Items Table -->
+
+        <hr class="my-4" style="border-color: var(--border-color);" />
+
+        <!-- Live Preview -->
+
+        @if (blogItems.Any())
+        {
+            <div class="row">
+                @foreach (var item in blogItems)
+                {
+                    string css = item.cssCode ?? "";
+                    string content = item.contence ?? "";
+
+                    <div class="col-1">
+                        <div class="type-badge me-3">
+                            @item.type.ToString()
+                        </div>
+                    </div>
+
+                    <div class="mb-4 col-10">
+                        @{
+                            switch (item.type)
+                            {
+                                case BlogItem._BlogItemType.img:
+                                    <img src="@content" style="@css" class="img-fluid rounded" />
+                                    ;
+                                    break;
+
+                                case BlogItem._BlogItemType.h1:
+                                    <h1 style="@css" class="text-heading">@content</h1>
+                                    ;
+                                    break;
+
+                                case BlogItem._BlogItemType.h2:
+                                    <h2 style="@css" class="text-heading">@content</h2>
+                                    ;
+                                    break;
+
+                                case BlogItem._BlogItemType.h3:
+                                    <h3 style="@css" class="text-subheading">@content</h3>
+                                    ;
+                                    break;
+
+                                case BlogItem._BlogItemType.div:
+                                    <div style="@css" class="text-body-lg">@content</div>
+                                    ;
+                                    break;
+
+                                default:
+                                    <p style="@css" class="text-body-lg">@content</p>
+                                    ;
+                                    break;
+                            }
+                        }
+                    </div>
+
+                    <div class="col-1">
+                            <a asp-action="EditBlogItem"
+                               asp-route-id="@item.Id"
+                               class="icon-btn"
+                               title="Edit item">
+                                <i class="carbon-icon carbon-icon-white">✎</i>
+                            </a>
+                    </div>
+                }
+            </div>
+
+        }
+        else
+        {
+            <p class="text-muted">Nothing to preview yet.</p>
+        }
+
+    </div>
+
+</section>
+

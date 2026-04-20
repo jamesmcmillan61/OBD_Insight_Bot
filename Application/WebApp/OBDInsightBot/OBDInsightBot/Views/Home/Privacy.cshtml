@@ -1,0 +1,187 @@
+@{
+    ViewData["Title"] = "Privacy Policy";
+    Layout = "_HomeLayout";
+}
+
+<section class="container-fluid section-padding bg-dark-primary">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+
+                <!-- Header -->
+                <div class="mb-5">
+                    <h1 class="text-display text-white mb-3" style="font-size: 2.5rem;">Privacy Policy</h1>
+                    <div class="accent-line"></div>
+                    <p class="text-body-lg" style="color: #a8a8a8;">
+                        Last updated: February 2026
+                    </p>
+                </div>
+
+                <!-- Introduction -->
+                <div class="policy-section">
+                    <h2 class="policy-heading">Introduction</h2>
+                    <p class="policy-text">
+                        OBD Insight Bot ("we", "our", or "us") is committed to protecting your privacy.
+                        This Privacy Policy explains how we collect, use, and safeguard your information
+                        when you use our vehicle diagnostic analysis service.
+                    </p>
+                </div>
+
+                <!-- Data Collection -->
+                <div class="policy-section">
+                    <h2 class="policy-heading">Data We Collect</h2>
+                    <p class="policy-text">When you use our service, we may collect:</p>
+                    <ul class="policy-list">
+                        <li><strong class="text-white">OBD-II Diagnostic Data:</strong> Vehicle diagnostic codes, sensor readings, and performance metrics you upload</li>
+                        <li><strong class="text-white">Vehicle Information:</strong> Make, model, year, and engine specifications derived from your data</li>
+                        <li><strong class="text-white">Chat History:</strong> Questions you ask and responses provided during your session</li>
+                        <li><strong class="text-white">Session Data:</strong> Temporary identifiers to maintain your chat context</li>
+                    </ul>
+                </div>
+
+                <!-- How We Use Data -->
+                <div class="policy-section">
+                    <h2 class="policy-heading">How We Use Your Data</h2>
+                    <p class="policy-text">Your data is used solely to:</p>
+                    <ul class="policy-list">
+                        <li>Analyze your vehicle's diagnostic information</li>
+                        <li>Provide AI-powered insights and recommendations</li>
+                        <li>Maintain context during your chat session</li>
+                        <li>Improve our service quality (anonymized and aggregated only)</li>
+                    </ul>
+                </div>
+
+                <!-- Data Storage -->
+                <div class="policy-section">
+                    <h2 class="policy-heading">Data Storage & Retention</h2>
+                    <ul class="policy-list">
+                        <li><strong class="text-white">Session-Based:</strong> Your uploaded data and chat history are stored only for the duration of your session</li>
+                        <li><strong class="text-white">Automatic Deletion:</strong> All personal data is automatically deleted when you clear your session or close the browser</li>
+                        <li><strong class="text-white">No Long-Term Storage:</strong> We do not retain your vehicle data or chat history after your session ends</li>
+                        <li><strong class="text-white">Local Processing:</strong> Data is processed locally and not shared with third parties</li>
+                    </ul>
+                </div>
+
+                <!-- Data Sharing -->
+                <div class="policy-section">
+                    <h2 class="policy-heading">Data Sharing</h2>
+                    <p class="policy-text">
+                        We do <strong class="text-white">not</strong> sell, trade, or share your personal vehicle data with third parties.
+                        Your diagnostic information remains private and is used exclusively to provide you with analysis and recommendations.
+                    </p>
+                </div>
+
+                <!-- Your Rights -->
+                <div class="policy-section">
+                    <h2 class="policy-heading">Your Rights</h2>
+                    <p class="policy-text">You have the right to:</p>
+                    <ul class="policy-list">
+                        <li><strong class="text-white">Delete Your Data:</strong> Clear all your data at any time using the "Clear Data" option</li>
+                        <li><strong class="text-white">Access Information:</strong> Request information about what data we hold during your session</li>
+                        <li><strong class="text-white">Opt Out:</strong> Choose not to use the service if you disagree with these terms</li>
+                    </ul>
+                </div>
+
+                <!-- Security -->
+                <div class="policy-section">
+                    <h2 class="policy-heading">Security</h2>
+                    <p class="policy-text">
+                        We implement appropriate security measures to protect your data during transmission and processing.
+                        However, no method of electronic transmission is 100% secure, and we cannot guarantee absolute security.
+                    </p>
+                </div>
+
+                <!-- Contact -->
+                <div class="policy-section">
+                    <h2 class="policy-heading">Contact Us</h2>
+                    <p class="policy-text">
+                        This application is developed as part of the University of Hull CDP Project for IBM.
+                        For questions about this privacy policy, please contact the project team through the university.
+                    </p>
+                </div>
+
+                <!-- Back Link -->
+                <div class="mt-5 pt-4 back-link-section">
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-premium btn-premium-outline">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Home
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .policy-section {
+        margin-bottom: 2.5rem;
+    }
+
+    .policy-heading {
+        font-size: 1.375rem;
+        font-weight: 600;
+        color: var(--text-primary, #ffffff);
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border-color, #2a2a2a);
+    }
+
+    .policy-text {
+        font-size: 1rem;
+        line-height: 1.8;
+        color: var(--text-muted, #a8a8a8);
+        margin-bottom: 1rem;
+    }
+
+    .policy-list {
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 0;
+    }
+
+    .policy-list li {
+        position: relative;
+        padding-left: 1.5rem;
+        margin-bottom: 0.75rem;
+        font-size: 1rem;
+        line-height: 1.7;
+        color: var(--text-muted, #a8a8a8);
+    }
+
+    .policy-list li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0.6rem;
+        width: 6px;
+        height: 6px;
+        background-color: var(--accent-primary, #0f62fe);
+        border-radius: 50%;
+    }
+
+    .back-link-section {
+        border-top: 1px solid var(--border-color, #2a2a2a);
+    }
+
+    /* Light theme overrides */
+    [data-theme="light"] .policy-heading {
+        color: var(--text-primary);
+        border-bottom-color: var(--border-color);
+    }
+
+    [data-theme="light"] .policy-text {
+        color: var(--text-secondary);
+    }
+
+    [data-theme="light"] .policy-list li {
+        color: var(--text-secondary);
+    }
+
+    [data-theme="light"] .policy-list li strong.text-white {
+        color: var(--text-primary) !important;
+    }
+
+    [data-theme="light"] .back-link-section {
+        border-top-color: var(--border-color);
+    }
+</style>

@@ -1,0 +1,515 @@
+# Azure DevOps Pipeline for OBD InsightBot API
+# Python FastAPI deployment to Windows VM (no Docker)
+
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+  paths:
+    include:
+      - AI/obd-insightbot-api/**
+      - AI/ai_core.py
+      - AI/ai_service.py
+    exclude:
+      - docs/**
+      - README.md
+
+pool:
+  name: "2526 IBM OBD InsightBot Agent Pool"
+
+variables:
+  pythonVersion: '3.14'
+  apiPath: 'AI/obd-insightbot-api'
+
+stages:
+  - stage: Build
+    displayName: 'Build and Test'
+    jobs:
+      - job: BuildJob
+        displayName: 'Build Python API'
+        steps:
+          # Locate Python and add to PATH
+          - powershell: |
+              $allPython = where.exe python 2>$null
+              if ($allPython) {
+                $allPython = $allPython -split "`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" }
+              }
+
+              $found = $null
+              foreach ($exe in $allPython) {
+                if ($exe -match "dotnet|Emscripten|WindowsApps") { continue }
+                & $exe -m pip --version 2>$null | Out-Null
+                if ($LASTEXITCODE -eq 0) {
+                  $found = Split-Path $exe
+                  break
+                }
+              }
+
+              if (-not $found) {
+                Write-Host "##[section]All python.exe locations found on this agent:"
+                where.exe python 2>$null | ForEach-Object { Write-Host "  $_" }
+                Write-Host ""
+                Write-Error "No usable Python with pip found. Please install Python on the agent and ensure pip is available."
+                exit 1
+              }
+
+              Write-Host "Using Python at: $found"
+              & "$found\python.exe" --version
+              Write-Host "##vso[task.prependpath]$found"
+              Write-Host "##vso[task.prependpath]$found\Scripts"
+            displayName: 'Locate Python and add to PATH'
+
+          # Install dependencies
+          - powershell: |
+              Set-Location "$(apiPath)"
+              python -m pip install --upgrade pip
+
+              $filtered = Get-Content requirements.txt | Where-Object { $_ -notmatch "^\s*llama[-_]cpp[-_]python" -and $_ -notmatch "^\s*#" -and $_.Trim() -ne "" }
+              $filtered | Set-Content requirements-filtered.txt
+              python -m pip install -r requirements-filtered.txt --prefer-binary
+
+              $localWheel = Get-ChildItem "wheels\llama_cpp_python-*.whl" -ErrorAction SilentlyContinue | Select-Object -First 1
+              if ($localWheel) {
+                Write-Host "Installing llama-cpp-python from local wheel: $($localWheel.Name)"
+                python -m pip install $localWheel.FullName
+                if ($LASTEXITCODE -ne 0) { Write-Error "Failed to install local wheel."; exit 1 }
+              } else {
+                Write-Host "No local wheel found in wheels\, trying PyPI..."
+                python -m pip install llama-cpp-python --prefer-binary --only-binary llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
+                if ($LASTEXITCODE -ne 0) { Write-Error "llama-cpp-python install failed. Add the .whl to AI/obd-insightbot-api/wheels/."; exit 1 }
+              }
+
+              python -m pip install pytest pytest-cov pytest-asyncio
+              Write-Host "Dependencies installed"
+            displayName: 'Install dependencies'
+
+          # Run linting (optional)
+          - script: |
+              python -m pip install flake8
+              cd $(apiPath)
+              python -m flake8 ai_core.py ai_service.py --max-line-length=120 --exclude=__pycache__,venv --count --statistics
+            displayName: 'Run code linting'
+            continueOnError: true
+
+          # Run tests
+          - script: |
+              cd $(apiPath)
+              python -m pytest tests/ -v --junitxml=junit/test-results.xml --cov=ai_core --cov=ai_service --cov-report=xml --cov-report=html
+            displayName: 'Run unit tests'
+            continueOnError: false
+
+          # Publish test results
+          - task: PublishTestResults@2
+            displayName: 'Publish test results'
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '$(apiPath)/junit/test-results.xml'
+              failTaskOnFailedTests: true
+
+          # Publish code coverage
+          - task: PublishCodeCoverageResults@1
+            displayName: 'Publish code coverage'
+            inputs:
+              codeCoverageTool: 'Cobertura'
+              summaryFileLocation: '$(apiPath)/coverage.xml'
+              reportDirectory: '$(apiPath)/htmlcov'
+
+          # Package the application
+          - task: ArchiveFiles@2
+            displayName: 'Archive API files'
+            inputs:
+              rootFolderOrFile: '$(apiPath)'
+              includeRootFolder: false
+              archiveType: 'zip'
+              archiveFile: '$(Build.ArtifactStagingDirectory)/api-package.zip'
+              replaceExistingArchive: true
+
+          # Publish build artifacts
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish artifacts'
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+              ArtifactName: 'api-drop'
+              publishLocation: 'Container'
+
+  - stage: Deploy_Dev
+    displayName: 'Deploy to Development'
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+    jobs:
+      - deployment: DeployDevWindows
+        displayName: 'Deploy to Dev Windows VM'
+        environment: 'dev-windows'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                # Download artifacts
+                - task: DownloadBuildArtifacts@0
+                  displayName: 'Download artifacts'
+                  inputs:
+                    buildType: 'current'
+                    downloadType: 'single'
+                    artifactName: 'api-drop'
+                    downloadPath: '$(System.ArtifactsDirectory)'
+
+                # Locate Python and add to PATH
+                - powershell: |
+                    $allPython = where.exe python 2>$null
+                    if ($allPython) {
+                      $allPython = $allPython -split "`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" }
+                    }
+                    $found = $null
+                    foreach ($exe in $allPython) {
+                      if ($exe -match "dotnet|Emscripten|WindowsApps") { continue }
+                      & $exe -m pip --version 2>$null | Out-Null
+                      if ($LASTEXITCODE -eq 0) { $found = Split-Path $exe; break }
+                    }
+                    if (-not $found) {
+                      Write-Error "No usable Python with pip found on this agent."
+                      exit 1
+                    }
+                    Write-Host "Using Python at: $found"
+                    Write-Host "##vso[task.prependpath]$found"
+                    Write-Host "##vso[task.prependpath]$found\Scripts"
+                  displayName: 'Locate Python and add to PATH'
+
+                # Stop the API service
+                - powershell: |
+                    $service = Get-Service -Name "OBDInsightBotAPI" -ErrorAction SilentlyContinue
+                    if ($service) {
+                        Stop-Service -Name "OBDInsightBotAPI" -Force
+                        Write-Host "Service stopped"
+                    } else {
+                        Write-Host "Service doesn't exist yet (first deployment)"
+                    }
+                  displayName: 'Stop API service'
+
+                # Copy artifact to staging location
+                - powershell: |
+                    if (!(Test-Path "C:\Temp")) { New-Item -Path "C:\Temp" -ItemType Directory -Force }
+                    Copy-Item -Path "$(System.ArtifactsDirectory)\api-drop\api-package.zip" -Destination "C:\Temp\api-package.zip" -Force
+                    Write-Host "Artifact copied to C:\Temp"
+                  displayName: 'Copy artifact to staging'
+
+                # Extract and deploy
+                - powershell: |
+                    $deployPath = "C:\Apps\OBDInsightBot-API"
+                    if (!(Test-Path $deployPath)) {
+                        New-Item -Path $deployPath -ItemType Directory -Force
+                    }
+                    Expand-Archive -Path "C:\Temp\api-package.zip" -DestinationPath $deployPath -Force
+                    Write-Host "Files extracted to $deployPath"
+                    Set-Location $deployPath
+                    python -m pip install --upgrade pip
+
+                    $filtered = Get-Content requirements.txt | Where-Object { $_ -notmatch "^\s*llama[-_]cpp[-_]python" -and $_ -notmatch "^\s*#" -and $_.Trim() -ne "" }
+                    $filtered | Set-Content requirements-filtered.txt
+                    python -m pip install -r requirements-filtered.txt --prefer-binary
+                    if ($LASTEXITCODE -ne 0) { Write-Warning "requirements-filtered.txt install had errors (see above)" }
+
+                    # Ensure uvicorn is installed — try [standard] extras first, fall back to plain
+                    python -m uvicorn --version 2>$null
+                    if ($LASTEXITCODE -ne 0) {
+                        Write-Host "uvicorn not found, installing..."
+                        python -m pip install "uvicorn[standard]" --prefer-binary
+                        if ($LASTEXITCODE -ne 0) {
+                            python -m pip install uvicorn --prefer-binary
+                        }
+                    }
+                    python -m uvicorn --version
+                    if ($LASTEXITCODE -ne 0) {
+                        Write-Error "uvicorn could not be installed. Cannot start service."
+                        exit 1
+                    }
+
+                    $localWheel = Get-ChildItem "$deployPath\wheels\llama_cpp_python-*.whl" -ErrorAction SilentlyContinue | Select-Object -First 1
+                    if ($localWheel) {
+                        Write-Host "Installing llama-cpp-python from local wheel: $($localWheel.Name)"
+                        python -m pip install $localWheel.FullName
+                        if ($LASTEXITCODE -ne 0) { Write-Error "Failed to install local wheel."; exit 1 }
+                    } else {
+                        Write-Host "No local wheel found in wheels\, trying PyPI..."
+                        python -m pip install llama-cpp-python --prefer-binary --only-binary llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
+                        if ($LASTEXITCODE -ne 0) { Write-Error "llama-cpp-python install failed. Add the .whl to AI/obd-insightbot-api/wheels/."; exit 1 }
+                    }
+
+                    Write-Host "Dependencies installed"
+                  displayName: 'Extract and deploy API'
+
+                # Create/Update Windows Service
+                - powershell: |
+                    if (!(Test-Path "C:\nssm\nssm.exe")) {
+                        Write-Host "Downloading NSSM..."
+                        $nssmUrl = "https://nssm.cc/release/nssm-2.24.zip"
+                        Invoke-WebRequest -Uri $nssmUrl -OutFile "C:\Temp\nssm.zip"
+                        Expand-Archive -Path "C:\Temp\nssm.zip" -DestinationPath "C:\Temp" -Force
+                        if (!(Test-Path "C:\nssm")) { New-Item -Path "C:\nssm" -ItemType Directory -Force }
+                        Copy-Item -Path "C:\Temp\nssm-2.24\win64\*" -Destination "C:\nssm" -Recurse -Force
+                        Write-Host "NSSM installed"
+                    } else {
+                        Write-Host "NSSM already present, skipping download"
+                    }
+                    $nssm = "C:\nssm\nssm.exe"
+                    $serviceName = "OBDInsightBotAPI"
+                    $pythonPath = (Get-Command python).Source
+                    $appPath = "C:\Apps\OBDInsightBot-API"
+                    $service = Get-Service -Name $serviceName -ErrorAction SilentlyContinue
+                    if ($service) {
+                        & $nssm stop $serviceName
+                        & $nssm remove $serviceName confirm
+                        Write-Host "Removed existing service"
+                    }
+                    & $nssm install $serviceName $pythonPath "-m" "uvicorn" "ai_service:app" "--host" "0.0.0.0" "--port" "8000"
+                    & $nssm set $serviceName AppDirectory $appPath
+                    & $nssm set $serviceName DisplayName "OBD InsightBot API"
+                    & $nssm set $serviceName Description "FastAPI service for OBD InsightBot"
+                    & $nssm set $serviceName Start SERVICE_AUTO_START
+                    & $nssm set $serviceName AppEnvironmentExtra "ENVIRONMENT=development"
+                    & $nssm set $serviceName AppStdout "$appPath\logs\api-stdout.log"
+                    & $nssm set $serviceName AppStderr "$appPath\logs\api-stderr.log"
+                    Write-Host "Service created successfully"
+                  displayName: 'Create/Update Windows Service'
+
+                # Start the service
+                - powershell: |
+                    $logsPath = "C:\Apps\OBDInsightBot-API\logs"
+                    if (!(Test-Path $logsPath)) { New-Item -Path $logsPath -ItemType Directory -Force }
+
+                    Start-Service -Name "OBDInsightBotAPI" -ErrorAction SilentlyContinue
+                    Start-Sleep -Seconds 10
+
+                    $service = Get-Service -Name "OBDInsightBotAPI"
+                    Write-Host "Service Status: $($service.Status)"
+
+                    if ($service.Status -ne "Running") {
+                        Write-Host "##[error]Service failed to start. Dumping logs..."
+                        $stderr = "$logsPath\api-stderr.log"
+                        $stdout = "$logsPath\api-stdout.log"
+                        if (Test-Path $stderr) {
+                            Write-Host "--- STDERR ---"
+                            Get-Content $stderr | Select-Object -Last 50 | ForEach-Object { Write-Host $_ }
+                        } else { Write-Host "No stderr log found at $stderr" }
+                        if (Test-Path $stdout) {
+                            Write-Host "--- STDOUT ---"
+                            Get-Content $stdout | Select-Object -Last 50 | ForEach-Object { Write-Host $_ }
+                        } else { Write-Host "No stdout log found at $stdout" }
+
+                        Write-Host "--- Installed packages ---"
+                        python -m pip list 2>&1 | Select-String "llama|uvicorn|fastapi|psutil|huggingface"
+
+                        Write-Host "--- Test import ai_service directly ---"
+                        Set-Location "C:\Apps\OBDInsightBot-API"
+                        python -c "import ai_service" 2>&1 | ForEach-Object { Write-Host $_ }
+
+                        exit 1
+                    }
+
+                    # Retry health check — model loading can take several minutes
+                    $maxAttempts = 18
+                    $attempt = 0
+                    $healthy = $false
+                    Write-Host "Waiting for API to become ready (model load may take a few minutes)..."
+                    while ($attempt -lt $maxAttempts -and -not $healthy) {
+                        Start-Sleep -Seconds 10
+                        $attempt++
+                        try {
+                            $response = Invoke-WebRequest -Uri "http://localhost:8000/health" -UseBasicParsing -TimeoutSec 5
+                            if ($response.StatusCode -eq 200) {
+                                Write-Host "Health check passed on attempt $attempt"
+                                $healthy = $true
+                            }
+                        } catch {
+                            Write-Host "Attempt $attempt/$maxAttempts - not ready yet..."
+                        }
+                    }
+                    if (-not $healthy) {
+                        Write-Error "API did not become healthy after $($maxAttempts * 10) seconds."
+                        exit 1
+                    }
+                  displayName: 'Start API service'
+
+  - stage: Deploy_Production
+    displayName: 'Deploy to Production'
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: DeployProdWindows
+        displayName: 'Deploy to Production Windows VM'
+        environment: 'production-windows'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                # Download artifacts
+                - task: DownloadBuildArtifacts@0
+                  displayName: 'Download artifacts'
+                  inputs:
+                    buildType: 'current'
+                    downloadType: 'single'
+                    artifactName: 'api-drop'
+                    downloadPath: '$(System.ArtifactsDirectory)'
+
+                # Locate Python and add to PATH
+                - powershell: |
+                    $allPython = where.exe python 2>$null
+                    if ($allPython) {
+                      $allPython = $allPython -split "`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" }
+                    }
+                    $found = $null
+                    foreach ($exe in $allPython) {
+                      if ($exe -match "dotnet|Emscripten|WindowsApps") { continue }
+                      & $exe -m pip --version 2>$null | Out-Null
+                      if ($LASTEXITCODE -eq 0) { $found = Split-Path $exe; break }
+                    }
+                    if (-not $found) {
+                      Write-Error "No usable Python with pip found on this agent."
+                      exit 1
+                    }
+                    Write-Host "Using Python at: $found"
+                    Write-Host "##vso[task.prependpath]$found"
+                    Write-Host "##vso[task.prependpath]$found\Scripts"
+                  displayName: 'Locate Python and add to PATH'
+
+                # Backup current deployment
+                - powershell: |
+                    $deployPath = "C:\Apps\OBDInsightBot-API"
+                    $backupPath = "C:\Apps\OBDInsightBot-API-Backup-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
+                    if (Test-Path $deployPath) {
+                        Copy-Item -Path $deployPath -Destination $backupPath -Recurse
+                        Write-Host "Backup created at: $backupPath"
+                    }
+                  displayName: 'Backup current deployment'
+
+                # Stop the API service
+                - powershell: |
+                    $service = Get-Service -Name "OBDInsightBotAPI" -ErrorAction SilentlyContinue
+                    if ($service) {
+                        Stop-Service -Name "OBDInsightBotAPI" -Force
+                        Write-Host "Service stopped"
+                    } else {
+                        Write-Host "Service doesn't exist yet"
+                    }
+                  displayName: 'Stop API service'
+
+                # Copy artifact to staging location
+                - powershell: |
+                    if (!(Test-Path "C:\Temp")) { New-Item -Path "C:\Temp" -ItemType Directory -Force }
+                    Copy-Item -Path "$(System.ArtifactsDirectory)\api-drop\api-package.zip" -Destination "C:\Temp\api-package.zip" -Force
+                    Write-Host "Artifact copied to C:\Temp"
+                  displayName: 'Copy artifact to staging'
+
+                # Extract and deploy
+                - powershell: |
+                    $deployPath = "C:\Apps\OBDInsightBot-API"
+                    Expand-Archive -Path "C:\Temp\api-package.zip" -DestinationPath $deployPath -Force
+                    Set-Location $deployPath
+                    python -m pip install --upgrade pip
+
+                    $filtered = Get-Content requirements.txt | Where-Object { $_ -notmatch "^\s*llama[-_]cpp[-_]python" -and $_ -notmatch "^\s*#" -and $_.Trim() -ne "" }
+                    $filtered | Set-Content requirements-filtered.txt
+                    python -m pip install -r requirements-filtered.txt --prefer-binary
+                    if ($LASTEXITCODE -ne 0) { Write-Warning "requirements-filtered.txt install had errors (see above)" }
+
+                    # Ensure uvicorn is installed — try [standard] extras first, fall back to plain
+                    python -m uvicorn --version 2>$null
+                    if ($LASTEXITCODE -ne 0) {
+                        Write-Host "uvicorn not found, installing..."
+                        python -m pip install "uvicorn[standard]" --prefer-binary
+                        if ($LASTEXITCODE -ne 0) {
+                            python -m pip install uvicorn --prefer-binary
+                        }
+                    }
+                    python -m uvicorn --version
+                    if ($LASTEXITCODE -ne 0) {
+                        Write-Error "uvicorn could not be installed. Cannot start service."
+                        exit 1
+                    }
+
+                    $localWheel = Get-ChildItem "$deployPath\wheels\llama_cpp_python-*.whl" -ErrorAction SilentlyContinue | Select-Object -First 1
+                    if ($localWheel) {
+                        Write-Host "Installing llama-cpp-python from local wheel: $($localWheel.Name)"
+                        python -m pip install $localWheel.FullName
+                        if ($LASTEXITCODE -ne 0) { Write-Error "Failed to install local wheel."; exit 1 }
+                    } else {
+                        Write-Host "No local wheel found in wheels\, trying PyPI..."
+                        python -m pip install llama-cpp-python --prefer-binary --only-binary llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
+                        if ($LASTEXITCODE -ne 0) { Write-Error "llama-cpp-python install failed. Add the .whl to AI/obd-insightbot-api/wheels/."; exit 1 }
+                    }
+
+                    Write-Host "Deployment complete"
+                  displayName: 'Extract and deploy API'
+
+                # Create/Update Windows Service
+                - powershell: |
+                    if (!(Test-Path "C:\nssm\nssm.exe")) {
+                        Write-Host "Downloading NSSM..."
+                        $nssmUrl = "https://nssm.cc/release/nssm-2.24.zip"
+                        Invoke-WebRequest -Uri $nssmUrl -OutFile "C:\Temp\nssm.zip"
+                        Expand-Archive -Path "C:\Temp\nssm.zip" -DestinationPath "C:\Temp" -Force
+                        if (!(Test-Path "C:\nssm")) { New-Item -Path "C:\nssm" -ItemType Directory -Force }
+                        Copy-Item -Path "C:\Temp\nssm-2.24\win64\*" -Destination "C:\nssm" -Recurse -Force
+                        Write-Host "NSSM installed"
+                    } else {
+                        Write-Host "NSSM already present, skipping download"
+                    }
+                    $nssm = "C:\nssm\nssm.exe"
+                    $serviceName = "OBDInsightBotAPI"
+                    $pythonPath = (Get-Command python).Source
+                    $appPath = "C:\Apps\OBDInsightBot-API"
+                    $service = Get-Service -Name $serviceName -ErrorAction SilentlyContinue
+                    if ($service) {
+                        & $nssm stop $serviceName
+                        & $nssm remove $serviceName confirm
+                        Write-Host "Removed existing service"
+                    }
+                    & $nssm install $serviceName $pythonPath "-m" "uvicorn" "ai_service:app" "--host" "0.0.0.0" "--port" "8000"
+                    & $nssm set $serviceName AppDirectory $appPath
+                    & $nssm set $serviceName DisplayName "OBD InsightBot API"
+                    & $nssm set $serviceName Description "FastAPI service for OBD InsightBot"
+                    & $nssm set $serviceName Start SERVICE_AUTO_START
+                    & $nssm set $serviceName AppEnvironmentExtra "ENVIRONMENT=production"
+                    & $nssm set $serviceName AppStdout "$appPath\logs\api-stdout.log"
+                    & $nssm set $serviceName AppStderr "$appPath\logs\api-stderr.log"
+                    Write-Host "Service created successfully"
+                  displayName: 'Create/Update Windows Service'
+
+                # Start service and verify
+                - powershell: |
+                    $logsPath = "C:\Apps\OBDInsightBot-API\logs"
+                    if (!(Test-Path $logsPath)) { New-Item -Path $logsPath -ItemType Directory -Force }
+
+                    Start-Service -Name "OBDInsightBotAPI" -ErrorAction SilentlyContinue
+                    Start-Sleep -Seconds 10
+
+                    $service = Get-Service -Name "OBDInsightBotAPI"
+                    Write-Host "Service Status: $($service.Status)"
+
+                    if ($service.Status -ne "Running") {
+                        Write-Host "##[error]Service failed to start. Dumping logs..."
+                        $stderr = "$logsPath\api-stderr.log"
+                        $stdout = "$logsPath\api-stdout.log"
+                        if (Test-Path $stderr) {
+                            Write-Host "--- STDERR ---"
+                            Get-Content $stderr | Select-Object -Last 50 | ForEach-Object { Write-Host $_ }
+                        } else { Write-Host "No stderr log found at $stderr" }
+                        if (Test-Path $stdout) {
+                            Write-Host "--- STDOUT ---"
+                            Get-Content $stdout | Select-Object -Last 50 | ForEach-Object { Write-Host $_ }
+                        } else { Write-Host "No stdout log found at $stdout" }
+
+                        Write-Host "--- Installed packages ---"
+                        python -m pip list 2>&1 | Select-String "llama|uvicorn|fastapi|psutil|huggingface"
+
+                        Write-Host "--- Test import ai_service directly ---"
+                        Set-Location "C:\Apps\OBDInsightBot-API"
+                        python -c "import ai_service" 2>&1 | ForEach-Object { Write-Host $_ }
+
+                        exit 1
+                    }
+
+                    Write-Host "Production deployment successful!"
+                  displayName: 'Start and verify service'
+                 

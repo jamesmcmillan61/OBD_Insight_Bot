@@ -1,0 +1,121 @@
+﻿@model OBDInsightBot.Models.BlogItem
+
+@{
+    ViewData["Title"] = "Blog item";
+    Layout = "_HomeLayout";
+    BlogPost ThisBlogPostID = ViewBag.BlogPost as BlogPost;
+
+
+}
+
+<style>
+    h2 { color: var(--text-primary, #ffffff); }
+    label { color: var(--text-secondary, #c6c6c6); display: block; margin-bottom: 0.375rem; }
+    .form-control, .form-select { background-color: var(--bg-surface, #262626); color: var(--text-primary, #ffffff); border-color: var(--border-color, #2a2a2a); }
+    .form-control:focus, .form-select:focus { background-color: var(--bg-surface, #262626); color: var(--text-primary, #ffffff); border-color: var(--accent-primary, #0f62fe); box-shadow: 0 0 0 2px rgba(15,98,254,0.25); }
+    .form-control::placeholder { color: var(--text-subtle, #6f6f6f); }
+    .btn-primary { background-color: var(--accent-primary, #0f62fe); border-color: var(--accent-primary, #0f62fe); }
+    .btn-primary:hover { background-color: #0353e9; border-color: #0353e9; }
+</style>
+
+<p style="color: var(--text-muted, #a8a8a8); font-size: 0.8125rem;">Post ID: @ThisBlogPostID.Id</p>
+
+<div style="display:flex; gap:40px; align-items:flex-start;">
+    
+    <!-- ================ -->
+    <!-- LEFT: FORM       -->
+    <!-- ================ -->
+    <div style="flex:1;">
+        <h2>Create Blog Item</h2>
+
+        <form asp-action="AddBlogItemConfirm">
+            
+            <input type="hidden" asp-for="BlogPostId" value="@ThisBlogPostID.Id" />
+
+            <div class="mb-3">
+                <label asp-for="type"></label>
+                <select asp-for="type" class="form-select" id="typeInput">
+                    @foreach (var t in Enum.GetValues(typeof(BlogItem._BlogItemType)))
+                    {
+                        <option value="@t">@t</option>
+                    }
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="contence">Content</label>
+                <textarea asp-for="contence" class="form-control" id="contentInput"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="cssCode">Custom CSS</label>
+                <textarea asp-for="cssCode" class="form-control" id="cssInput" placeholder="color:red; font-size:20px;"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="PositionInBlog">Position In Blog</label>
+                <input asp-for="PositionInBlog" class="form-control" type="number" id="positionInput" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create</button>
+
+        </form>
+    </div>
+
+    <!-- ==================== -->
+    <!-- RIGHT: LIVE PREVIEW  -->
+    <!-- ==================== -->
+    <div style="flex:1; border-left:1px solid var(--border-color, #2a2a2a); padding-left:25px;">
+        <h2 style="color: var(--text-primary, #ffffff);">Preview</h2>
+
+        <div id="previewContainer" style="padding:20px; border:1px solid var(--border-color, #2a2a2a); border-radius:8px; background: var(--bg-elevated, #1a1a1a);">
+            <div id="previewElement" style="padding:10px; color: var(--text-primary, #ffffff);">
+                <p style="color: var(--text-muted, #a8a8a8);">Start typing to preview...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const typeInput = document.getElementById("typeInput");
+    const contentInput = document.getElementById("contentInput");
+    const cssInput = document.getElementById("cssInput");
+    const previewElement = document.getElementById("previewElement");
+
+    function updatePreview() {
+        const type = typeInput.value;
+        const content = contentInput.value;
+        const css = cssInput.value;
+
+        let el;
+
+        switch (type) {
+            case "img":
+                el = document.createElement("img");
+                el.src = content || "/branding/Blog/BlogImage.png";
+                el.style.maxWidth = "100%";
+                break;
+
+            default:
+                el = document.createElement(type);
+                el.innerHTML = content.replace(/\n/g, "<br>");
+                break;
+        }
+
+        // Apply custom CSS
+        if (css.trim().length > 0) {
+            css.split(";").forEach(rule => {
+                const [prop, val] = rule.split(":");
+                if (prop && val) el.style[prop.trim()] = val.trim();
+            });
+        }
+
+        previewElement.innerHTML = "";
+        previewElement.appendChild(el);
+    }
+
+    document.querySelectorAll("#typeInput, #contentInput, #cssInput")
+        .forEach(el => el.addEventListener("input", updatePreview));
+</script>
+}

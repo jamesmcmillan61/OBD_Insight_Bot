@@ -1,0 +1,636 @@
+﻿@{
+    Guid? selectedSessionID = ViewBag.SelectedSessionID ?? null;
+    UserOBDData? MyCardata = ViewBag.selectedcarOBDData ?? null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewData["Title"] - OBD Insight BOT | IBM | University Of Hull</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+    <style>
+        /* Theme Variables */
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #161616;
+            --bg-elevated: #1a1a1a;
+            --bg-surface: #262626;
+            --border-color: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #c6c6c6;
+            --text-muted: #a8a8a8;
+            --text-subtle: #6f6f6f;
+            --accent-primary: #0f62fe;
+            --accent-success: #24a148;
+            --accent-danger: #fa4d56;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f4f4f4;
+            --bg-elevated: #ffffff;
+            --bg-surface: #e0e0e0;
+            --border-color: #d0d0d0;
+            --text-primary: #161616;
+            --text-secondary: #525252;
+            --text-muted: #6f6f6f;
+            --text-subtle: #8d8d8d;
+            --accent-primary: #0f62fe;
+            --accent-success: #24a148;
+            --accent-danger: #da1e28;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            padding-top: 56px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* APP BAR */
+        .appbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1100;
+            height: 56px;
+            background-color: #0a0a0a;
+            display: flex;
+            align-items: center;
+            padding: 0 1.25rem;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        /* APP SHELL: layout container fills remaining viewport */
+        #app-container {
+            height: calc(100vh - 56px);
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #app-container > .row {
+            height: 100%;
+            margin: 0;
+            flex-wrap: nowrap;
+        }
+
+        .appbar-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #ffffff;
+            letter-spacing: -0.01em;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.15s ease;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+            .icon-btn:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                color: #ffffff;
+            }
+
+            .icon-btn i {
+                font-size: 1.125rem;
+            }
+
+        /* SIDEBAR */
+        .sidebar {
+            background-color: #0a0a0a;
+            height: 100%;
+            overflow-y: auto;
+            flex-shrink: 0;
+            transition: width 0.2s ease;
+            border-right: 1px solid #2a2a2a;
+        }
+
+            .sidebar.collapsed {
+                width: 0;
+                overflow: hidden;
+                border-right: none;
+            }
+
+        /* SIDEBAR OVERLAY (mobile backdrop) */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            top: 56px;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1040;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        /* MOBILE: fixed drawer pattern */
+        @@media (max-width: 575px) {
+            #sidebar {
+                position: fixed !important;
+                top: 56px;
+                left: 0;
+                height: calc(100vh - 56px);
+                width: 280px !important;
+                z-index: 1050;
+                transform: translateX(-100%);
+                transition: transform 0.25s ease !important;
+                overflow-y: auto;
+                min-height: unset;
+            }
+
+            #sidebar:not(.collapsed) {
+                transform: translateX(0);
+            }
+
+            #sidebar.collapsed {
+                transform: translateX(-100%);
+                width: 280px !important;
+                overflow: hidden;
+                border-right: 1px solid #2a2a2a !important;
+            }
+
+            .main-content {
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 0.75rem !important;
+            }
+        }
+
+            .sidebar h6 {
+                font-size: 0.6875rem;
+                font-weight: 600;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                color: #6f6f6f;
+                margin-bottom: 0.75rem;
+            }
+
+            .sidebar .list-unstyled li {
+                font-size: 0.8125rem;
+                color: #a8a8a8;
+                margin-bottom: 0.375rem;
+            }
+
+            .sidebar .list-unstyled strong {
+                color: #c6c6c6;
+                font-weight: 500;
+            }
+
+            .sidebar .text-muted {
+                color: #6f6f6f !important;
+                font-size: 0.8125rem;
+            }
+
+            /* Sidebar Buttons */
+            .sidebar .btn-primary {
+                background-color: #0f62fe;
+                border: none;
+                border-radius: 8px;
+                font-size: 0.8125rem;
+                font-weight: 500;
+                padding: 0.625rem 1rem;
+                transition: background-color 0.15s ease;
+            }
+
+                .sidebar .btn-primary:hover {
+                    background-color: #0353e9;
+                }
+
+            .sidebar .btn-outline-danger {
+                background-color: transparent;
+                border: 1px solid #393939;
+                border-radius: 8px;
+                font-size: 0.8125rem;
+                font-weight: 500;
+                padding: 0.625rem 1rem;
+                color: #fa4d56;
+                transition: border-color 0.15s ease, background-color 0.15s ease;
+            }
+
+                .sidebar .btn-outline-danger:hover {
+                    background-color: rgba(250, 77, 86, 0.1);
+                    border-color: #fa4d56;
+                }
+
+        /* MAIN CONTENT */
+        .main-content {
+            background-color: var(--bg-secondary);
+            height: 100%;
+            overflow-y: auto;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Theme-aware card styling */
+        [data-theme="light"] .card-premium {
+            background: var(--bg-elevated);
+            border-color: var(--border-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+            [data-theme="light"] .card-premium:hover {
+                border-color: var(--accent-primary);
+                box-shadow: 0 2px 8px rgba(15, 98, 254, 0.15);
+            }
+
+        [data-theme="light"] .text-white {
+            color: var(--text-primary) !important;
+        }
+
+        [data-theme="light"] .text-heading,
+        [data-theme="light"] .text-subheading {
+            color: var(--text-primary);
+        }
+
+        [data-theme="light"] .text-body-lg {
+            color: var(--text-secondary);
+        }
+
+        [data-theme="light"] .accent-line {
+            background-color: var(--accent-primary);
+        }
+
+        [data-theme="light"] .help-icon,
+        [data-theme="light"] .settings-icon {
+            background-color: rgba(15, 98, 254, 0.1);
+            border-color: var(--accent-primary);
+        }
+
+        [data-theme="light"] .btn-premium-outline {
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+            [data-theme="light"] .btn-premium-outline:hover {
+                border-color: var(--accent-primary);
+                color: var(--accent-primary);
+            }
+
+        /* Vehicle Info Card */
+        .vehicle-card {
+            margin: 0.75rem;
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color-strong, #525252);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .vehicle-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background-color: rgba(15, 98, 254, 0.1);
+            border-bottom: 1px solid var(--border-color, #2a2a2a);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--accent-primary, #0f62fe);
+        }
+
+            .vehicle-card-header i {
+                font-size: 0.875rem;
+            }
+
+        .vehicle-card-body {
+            padding: 0.75rem 1rem;
+        }
+
+        .vehicle-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.375rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+            .vehicle-stat:last-child {
+                border-bottom: none;
+            }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted, #a8a8a8);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .stat-value {
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--text-primary, #ffffff);
+        }
+
+        .vehicle-card-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1.5rem 1rem;
+            color: var(--text-subtle, #6f6f6f);
+        }
+
+            .vehicle-card-empty i {
+                font-size: 1.5rem;
+                opacity: 0.5;
+            }
+
+            .vehicle-card-empty span {
+                font-size: 0.75rem;
+            }
+
+        /* Light theme vehicle card */
+        [data-theme="light"] .vehicle-card {
+            background-color: rgba(0, 0, 0, 0.02);
+            border-color: var(--border-color-strong);
+        }
+
+        [data-theme="light"] .vehicle-card-header {
+            background-color: rgba(15, 98, 254, 0.08);
+            border-bottom-color: var(--border-color);
+        }
+
+        [data-theme="light"] .vehicle-stat {
+            border-bottom-color: rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- APP BAR -->
+    <header class="appbar">
+        <!-- MENU BUTTON -->
+        <button class="icon-btn"
+                onclick="toggleSidebar()"
+                title="Menu">
+            <i class="bi bi-list"></i>
+        </button>
+
+        <span class="appbar-title ms-3">IBM Insight Bot</span>
+
+        <div class="ms-auto d-flex align-items-center gap-1">
+
+            <!-- INFORMATION -->
+            <a class="icon-btn"
+               asp-controller="Help"
+               asp-action="Index"
+               title="Information">
+                <i class="bi bi-info-circle"></i>
+            </a>
+
+            <!-- SETTINGS -->
+            <a class="icon-btn"
+               asp-controller="Settings"
+               asp-action="Index"
+               title="Settings">
+                <i class="bi bi-gear"></i>
+            </a>
+
+        </div>
+    </header>
+
+
+    <!-- LAYOUT -->
+    <div class="container-fluid" id="app-container">
+        <div class="row">
+
+            <!-- MOBILE SIDEBAR BACKDROP -->
+            <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+            <!-- SIDEBAR -->
+            <aside id="sidebar" class="col-sm-3 col-lg-2 sidebar p-0" aria-label="Sidebar navigation">
+                <div class="d-flex flex-column h-100">
+
+                    <div class="sidebar-container">
+
+                        <!-- MAIN NAVIGATION -->
+                        <nav class="sidebar-nav">
+                            <a class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")"
+                               asp-controller="Home"
+                               asp-action="Index">
+                                <i class="bi bi-house"></i>
+                                <span class="sidebar-text">Home</span>
+                            </a>
+                            @if (selectedSessionID == null)
+                            {
+                                <a class="sidebar-link @(Context.Request.Path.StartsWithSegments("/Chat") ? "active" : "")"
+                               asp-controller="Chat"
+                               asp-action="Index">
+                                <i class="bi bi-chat-dots"></i>
+                                <span class="sidebar-text">Chat</span>
+                                </a>
+                            }
+                            else
+                            {
+                                <a class="sidebar-link @(Context.Request.Path.StartsWithSegments("/Chat") ? "active" : "")"
+                               asp-controller="Chat" asp-action="LetsChat" asp-route-SessionID="@selectedSessionID">
+                                <i class="bi bi-chat-dots"></i>
+                                <span class="sidebar-text">Chat</span>
+                            </a>
+                            }
+
+
+                           
+                            <a class="sidebar-link @(Context.Request.Path.StartsWithSegments("/Example") ? "active" : "")"
+                               asp-controller="Help"
+                               asp-action="Example">
+                                <i class="bi bi-box-arrow-up-right"></i>
+                                <span class="sidebar-text">Example</span>
+                            </a>
+                        </nav>
+
+                        <!-- DIVIDER -->
+                        <div class="sidebar-divider"></div>
+
+                        <!-- SECONDARY NAVIGATION -->
+                        <nav class="sidebar-nav">
+                            <a class="sidebar-link @(Context.Request.Path.StartsWithSegments("/Information") ? "active" : "")"
+                               asp-controller="Help"
+                               asp-action="Index">
+                                <i class="bi bi-info-circle"></i>
+                                <span class="sidebar-text">Information</span>
+                            </a>
+
+                            <a class="sidebar-link @(Context.Request.Path.StartsWithSegments("/Blogs") ? "active" : "")"
+                               asp-controller="Blogs"
+                               asp-action="Index">
+                                <i class="bi bi-book-half"></i>
+                                <span class="sidebar-text">Blog</span>
+                            </a>
+
+                            <a class="sidebar-link @(Context.Request.Path.StartsWithSegments("/Settings") ? "active" : "")"
+                               asp-controller="Settings"
+                               asp-action="Index">
+                                <i class="bi bi-gear"></i>
+                                <span class="sidebar-text">Settings</span>
+                            </a>
+
+                            <a class="sidebar-link @(Context.Request.Path.StartsWithSegments("/Analytics") ? "active" : "")"
+                               asp-controller="Analytics"
+                               asp-action="Index">
+                                <i class="bi bi-graph-up"></i>
+                                <span class="sidebar-text">Analytics</span>
+                            </a>
+                        </nav>
+
+                    </div>
+
+
+                    <!-- VEHICLE INFO CARD -->
+                    <div class="mt-auto">
+                        <div class="vehicle-card">
+                            <div class="vehicle-card-header">
+                                <section>
+                                    <i class="bi bi-car-front-fill"></i>
+                                    <span>Your Vehicle</span>
+                                </section>
+                                <section>
+                                    <a asp-contoller="Chat" asp-action="MyCarData" asp-route-SessionID="@selectedSessionID" >
+                                        <i class="bi bi-arrow-up-right-circle-fill"></i>
+                                    </a>
+                                </section>
+                                
+                            </div>
+                            @if (MyCardata != null)
+                            {
+                                <div class="vehicle-card-body">
+                                    <div class="vehicle-stat">
+                                        <span class="stat-label">Make</span>
+                                        <span class="stat-value">@MyCardata.Mark</span>
+                                    </div>
+                                    <div class="vehicle-stat">
+                                        <span class="stat-label">Model</span>
+                                        <span class="stat-value">@MyCardata.Model</span>
+                                    </div>
+                                    <div class="vehicle-stat">
+                                        <span class="stat-label">Year</span>
+                                        <span class="stat-value">@MyCardata.CarYear</span>
+                                    </div>
+                                    <div class="vehicle-stat">
+                                        <span class="stat-label">Engine</span>
+                                        <span class="stat-value">@MyCardata.EnginePower</span>
+                                    </div>
+                                    <div class="vehicle-stat">
+                                        <span class="stat-label">Fuel</span>
+                                        <span class="stat-value">@MyCardata.FuelLevel</span>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="vehicle-card-empty">
+                                    <i class="bi bi-cloud-upload"></i>
+                                    <span>No data uploaded</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- MAIN CONTENT -->
+            <main class="col main-content p-4" aria-label="Main content">
+                @RenderBody()
+            </main>
+
+        </div>
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+
+            if (window.innerWidth < 576) {
+                // Mobile: toggle fixed drawer + backdrop
+                const isOpen = !sidebar.classList.contains('collapsed');
+                if (isOpen) {
+                    sidebar.classList.add('collapsed');
+                    overlay.classList.remove('active');
+                } else {
+                    sidebar.classList.remove('collapsed');
+                    overlay.classList.add('active');
+                }
+            } else {
+                // Desktop: original width-collapse behaviour
+                sidebar.classList.toggle('collapsed');
+            }
+        }
+
+        // Theme Management
+        (function() {
+            const savedTheme = localStorage.getItem('obd-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('obd-theme', theme);
+            // Update toggle if it exists
+            const toggle = document.getElementById('themeToggle');
+            if (toggle) {
+                toggle.checked = theme === 'light';
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        }
+
+        // Initialize toggle state on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggle = document.getElementById('themeToggle');
+            if (toggle) {
+                const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+                toggle.checked = currentTheme === 'light';
+            }
+
+            // Auto-collapse sidebar on mobile by default
+            if (window.innerWidth < 576) {
+                document.getElementById('sidebar').classList.add('collapsed');
+            }
+
+            // Close sidebar when backdrop is tapped (mobile)
+            document.getElementById('sidebar-overlay').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.add('collapsed');
+                this.classList.remove('active');
+            });
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>
+

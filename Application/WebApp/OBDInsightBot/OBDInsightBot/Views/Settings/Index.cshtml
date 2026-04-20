@@ -1,0 +1,179 @@
+@{
+    Layout = "_ChatLayout";
+    ViewData["Title"] = "Settings";
+}
+
+<div class="container py-4">
+    <!-- Header -->
+    <div class="mb-5">
+        <h1 class="text-heading text-white mb-3">Settings</h1>
+        <div class="accent-line"></div>
+        <p class="text-body-lg">
+            Manage your preferences and application settings
+        </p>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Appearance -->
+        <div class="col-lg-6">
+            <div class="card-premium p-4 h-100">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="settings-icon me-3">
+                        <i class="bi bi-palette"></i>
+                    </div>
+                    <h3 class="text-subheading text-white mb-0">Appearance</h3>
+                </div>
+                <p class="text-body-lg mb-4">
+                    Customize how the application looks.
+                </p>
+
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-white">Light Mode</span>
+                            <p class="text-body-lg mb-0" style="font-size: 0.8125rem;">
+                                Switch between dark and light themes
+                            </p>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input theme-toggle" type="checkbox" id="themeToggle" onchange="toggleTheme()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Management -->
+        <div class="col-lg-6">
+            <div class="card-premium p-4 h-100">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="settings-icon me-3">
+                        <i class="bi bi-database"></i>
+                    </div>
+                    <h3 class="text-subheading text-white mb-0">Data Management</h3>
+                </div>
+                <p class="text-body-lg mb-4">
+                    Control how your vehicle data is stored and processed.
+                </p>
+
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-white">Auto-delete session data</span>
+                            <p class="text-body-lg mb-0" style="font-size: 0.8125rem;">
+                                Automatically remove data after session ends
+                            </p>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" checked disabled>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Privacy -->
+        <div class="col-lg-6">
+            <div class="card-premium p-4 h-100">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="settings-icon me-3">
+                        <i class="bi bi-shield-lock"></i>
+                    </div>
+                    <h3 class="text-subheading text-white mb-0">Privacy</h3>
+                </div>
+                <p class="text-body-lg mb-4">
+                    Your privacy matters. Review our data practices.
+                </p>
+
+                <a asp-controller="Home" asp-action="Privacy" class="btn btn-premium btn-premium-outline w-100">
+                    <i class="bi bi-file-text me-2"></i>View Privacy Policy
+                </a>
+            </div>
+        </div>
+
+        <!-- About -->
+        <div class="col-lg-6">
+            <div class="card-premium p-4 h-100">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="settings-icon me-3">
+                        <i class="bi bi-info-circle"></i>
+                    </div>
+                    <h3 class="text-subheading text-white mb-0">About</h3>
+                </div>
+
+                <ul class="list-unstyled text-body-lg mb-0">
+                    <li class="mb-2">
+                        <span class="text-muted-custom">Application:</span>
+                        <span class="text-white">OBD Insight Bot</span>
+                    </li>
+                    <li class="mb-2">
+                        <span class="text-muted-custom">Version:</span>
+                        <span class="text-white">1.0.0</span>
+                    </li>
+                    <li class="mb-2">
+                        <span class="text-muted-custom">AI Engine:</span>
+                        <span class="text-white">IBM Granite</span>
+                    </li>
+                    <li>
+                        <span class="text-muted-custom">Project:</span>
+                        <span class="text-white">University of Hull CPD for IBM</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .settings-icon {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        border-radius: 10px;
+        background-color: rgba(15, 98, 254, 0.15);
+        border: 1px solid #0f62fe;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0f62fe;
+        font-size: 1.25rem;
+    }
+
+    .setting-item {
+        padding: 1rem;
+        background-color: var(--bg-primary, #161616);
+        border: 1px solid var(--border-color, #2a2a2a);
+        border-radius: 8px;
+    }
+
+    .form-check-input {
+        width: 3rem;
+        height: 1.5rem;
+        background-color: #393939;
+        border: none;
+        cursor: pointer;
+    }
+
+    .form-check-input:checked {
+        background-color: #0f62fe;
+    }
+
+    .form-check-input:focus {
+        box-shadow: none;
+    }
+
+    .form-check-input:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    .text-muted-custom {
+        color: var(--text-subtle, #6f6f6f);
+    }
+
+    [data-theme="light"] .setting-item {
+        background-color: var(--bg-secondary);
+    }
+</style>

@@ -1,0 +1,52 @@
+# OBD InsightBot API - Docker Image with LLM Support
+# ===================================================
+# This image includes the Granite LLM model
+
+# Use Python 3.11 slim image
+FROM python:3.11-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    CMAKE_ARGS="-DLLAMA_BLAS=ON -DLLAMA_BLAS_VENDOR=OpenBLAS"
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies (including OpenBLAS for llama.cpp)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    cmake \
+    curl \
+    libopenblas-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY app/ ./app/
+
+# Create non-root user
+RUN useradd --create-home --shell /bin/bash appuser \
+    && mkdir -p /home/appuser/.cache \
+    && chown -R appuser:appuser /app /home/appuser/.cache
+USER appuser
+
+# Pre-download the model (optional - speeds up startup)
+# RUN python -c "from huggingface_hub import hf_hub_download; hf_hub_download('ibm-granite/granite-4.0-h-1b-GGUF', 'granite-4.0-h-1b-Q3_K_S.gguf')"
+
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Run with more workers for production
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

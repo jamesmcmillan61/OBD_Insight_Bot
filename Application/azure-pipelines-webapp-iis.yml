@@ -1,0 +1,299 @@
+# Azure DevOps Pipeline for OBD InsightBot WebApp
+# ASP.NET Core 8.0 deployment to IIS on Windows Server
+
+#change the develop branch in the future
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+  paths:
+    include:
+      - WebApp/OBDInsightBot/**
+    exclude:
+      - docs/**
+      - README.md
+
+pool:
+  name: '2526 IBM OBD InsightBot Agent Pool'
+
+variables:
+  buildConfiguration: 'Release'
+  webAppPath: 'WebApp/OBDInsightBot'
+  projectPath: 'WebApp/OBDInsightBot/OBDInsightBot/OBDInsightBot.csproj'
+  testProjectPath: 'WebApp/OBDInsightBot/OBDInsightBot.Tests/OBDInsightBot.Tests.csproj'
+  appPoolName: 'OBDInsightBot'
+  websiteName: 'OBDInsightBot'
+  deployPath: 'C:\inetpub\OBDInsightBot'
+
+stages:
+  - stage: Build
+    displayName: 'Build and Test'
+    jobs:
+      - job: BuildJob
+        displayName: 'Build WebApp'
+        steps:
+          - checkout: self
+            clean: true
+            persistCredentials: true
+
+          # Install .NET 9 SDK (for test project)
+          - task: UseDotNet@2
+            displayName: 'Install .NET 9 SDK'
+            inputs:
+              version: '9.x'
+              packageType: 'sdk'
+
+          # Install .NET 8 SDK (for main project)
+          - task: UseDotNet@2
+            displayName: 'Install .NET 8 SDK'
+            inputs:
+              version: '8.x'
+              packageType: 'sdk'
+
+          # Restore NuGet packages
+          - task: DotNetCoreCLI@2
+            displayName: 'Restore NuGet packages'
+            inputs:
+              command: 'restore'
+              projects: '$(webAppPath)/**/*.csproj'
+
+          # Build the solution
+          - task: DotNetCoreCLI@2
+            displayName: 'Build solution'
+            inputs:
+              command: 'build'
+              projects: '$(projectPath)'
+              arguments: '--configuration $(buildConfiguration) --no-restore'
+
+          # Run unit tests
+          - task: DotNetCoreCLI@2
+            displayName: 'Run unit tests'
+            inputs:
+              command: 'test'
+              projects: '$(testProjectPath)'
+              arguments: '--configuration $(buildConfiguration) --collect:"XPlat Code Coverage" --logger trx'
+              publishTestResults: true
+
+          # Publish code coverage results
+          - task: PublishCodeCoverageResults@1
+            displayName: 'Publish code coverage'
+            inputs:
+              codeCoverageTool: 'Cobertura'
+              summaryFileLocation: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
+
+          # Publish the web app
+          - task: DotNetCoreCLI@2
+            displayName: 'Publish WebApp'
+            inputs:
+              command: 'publish'
+              projects: '$(projectPath)'
+              arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/webapp --no-build'
+              publishWebProjects: false
+              zipAfterPublish: false
+
+          # Publish build artifacts
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish artifacts'
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)/webapp'
+              ArtifactName: 'webapp-drop'
+              publishLocation: 'Container'
+
+  - stage: Deploy_Dev
+    displayName: 'Deploy to Development IIS'
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+    jobs:
+      - deployment: DeployDevIIS
+        displayName: 'Deploy to Dev IIS Server'
+        environment: 'dev-iis'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                # Download artifacts
+                - task: DownloadBuildArtifacts@0
+                  displayName: 'Download artifacts'
+                  inputs:
+                    buildType: 'current'
+                    downloadType: 'single'
+                    artifactName: 'webapp-drop'
+                    downloadPath: '$(System.ArtifactsDirectory)'
+
+                # Deploy to IIS locally
+                - task: PowerShell@2
+                  displayName: 'Deploy to IIS'
+                  inputs:
+                    targetType: 'inline'
+                    script: |
+                      Import-Module WebAdministration
+
+                      # Stop app pool (handle already stopped)
+                      $pool = Get-WebAppPoolState -Name "$(appPoolName)"
+                      if ($pool.Value -ne 'Stopped') {
+                          Stop-WebAppPool -Name "$(appPoolName)"
+                          Write-Host "Waiting for app pool to stop..."
+                          Start-Sleep -Seconds 5
+                      } else {
+                          Write-Host "App pool already stopped"
+                      }
+
+                      # Kill any lingering w3wp.exe to release native DLL locks (e.g. e_sqlite3.dll)
+                      Get-Process -Name "w3wp" -ErrorAction SilentlyContinue | Stop-Process -Force
+                      Start-Sleep -Seconds 3
+
+                      # Define paths
+                      $source = "$(System.ArtifactsDirectory)\webapp-drop\OBDInsightBot"
+                      $destination = "$(deployPath)"
+
+                      # Remove all files/folders except the SQLite DB (retry on locked files)
+                      if (Test-Path $destination) {
+                          Get-ChildItem $destination | Where-Object { $_.Name -ne "OBDInsight.db" } | ForEach-Object {
+                              $retries = 3
+                              while ($retries -gt 0) {
+                                  try {
+                                      Remove-Item $_.FullName -Recurse -Force -ErrorAction Stop
+                                      $retries = 0
+                                  } catch {
+                                      $retries--
+                                      if ($retries -eq 0) { Write-Warning "Could not delete $($_.FullName): $_" }
+                                      else { Start-Sleep -Seconds 2 }
+                                  }
+                              }
+                          }
+                      }
+
+                      # Copy all files/folders except SQLite DB from artifacts
+                      Get-ChildItem $source -Recurse | Where-Object { $_.Name -ne "OBDInsight.db" } | ForEach-Object {
+                          $destPath = $_.FullName.Replace($source, $destination)
+                          if ($_.PSIsContainer) {
+                              if (-not (Test-Path $destPath)) { New-Item -ItemType Directory -Path $destPath | Out-Null }
+                          } else {
+                              Copy-Item $_.FullName $destPath -Force
+                          }
+                      }
+                      Write-Host "Files copied to $destination (SQLite DB preserved)"
+
+                      # Start app pool
+                      Start-WebAppPool -Name "$(appPoolName)"
+                      Write-Host "App pool started"
+
+                      # Ensure website is running
+                      $site = Get-Website -Name "$(websiteName)"
+                      if ($site.State -ne 'Started') {
+                          Start-Website -Name "$(websiteName)"
+                      }
+                      Write-Host "Website is running"
+
+                      # Health check
+                      Start-Sleep -Seconds 5
+                      try {
+                          $response = Invoke-WebRequest -Uri "http://localhost" -UseBasicParsing
+                          Write-Host "Health check passed: $($response.StatusCode)"
+                      } catch {
+                          Write-Warning "Health check failed: $_"
+
+                      }
+
+  - stage: Deploy_Production
+    displayName: 'Deploy to Production IIS'
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: DeployProdIIS
+        displayName: 'Deploy to Production IIS Server'
+        environment: 'production-iis'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                # Download artifacts
+                - task: DownloadBuildArtifacts@0
+                  displayName: 'Download artifacts'
+                  inputs:
+                    buildType: 'current'
+                    downloadType: 'single'
+                    artifactName: 'webapp-drop'
+                    downloadPath: '$(System.ArtifactsDirectory)'
+
+                # Deploy to IIS locally
+                - task: PowerShell@2
+                  displayName: 'Deploy to IIS'
+                  inputs:
+                    targetType: 'inline'
+                    script: |
+                      Import-Module WebAdministration
+
+                      # Stop app pool (handle already stopped)
+                      $pool = Get-WebAppPoolState -Name "$(appPoolName)"
+                      if ($pool.Value -ne 'Stopped') {
+                          Stop-WebAppPool -Name "$(appPoolName)"
+                          Write-Host "Waiting for app pool to stop..."
+                          Start-Sleep -Seconds 10
+                      } else {
+                          Write-Host "App pool already stopped"
+                      }
+
+                      # Kill any lingering w3wp.exe to release native DLL locks (e.g. e_sqlite3.dll)
+                      Get-Process -Name "w3wp" -ErrorAction SilentlyContinue | Stop-Process -Force
+                      Start-Sleep -Seconds 3
+
+                      # Backup existing deployment
+                      $backupPath = "$(deployPath)_backup_$(Get-Date -Format 'yyyyMMdd_HHmmss')"
+                      if (Test-Path "$(deployPath)") {
+                          Copy-Item -Path "$(deployPath)" -Destination $backupPath -Recurse
+                          Write-Host "Backup created at: $backupPath"
+                      }
+
+                      # Define paths
+                      $source = "$(System.ArtifactsDirectory)\webapp-drop\OBDInsightBot"
+                      $destination = "$(deployPath)"
+
+                      # Remove all files/folders except the SQLite DB (retry on locked files)
+                      if (Test-Path $destination) {
+                          Get-ChildItem $destination | Where-Object { $_.Name -ne "OBDInsight.db" } | ForEach-Object {
+                              $retries = 3
+                              while ($retries -gt 0) {
+                                  try {
+                                      Remove-Item $_.FullName -Recurse -Force -ErrorAction Stop
+                                      $retries = 0
+                                  } catch {
+                                      $retries--
+                                      if ($retries -eq 0) { Write-Warning "Could not delete $($_.FullName): $_" }
+                                      else { Start-Sleep -Seconds 2 }
+                                  }
+                              }
+                          }
+                      }
+
+                      # Copy all files/folders except SQLite DB from artifacts
+                      Get-ChildItem $source -Recurse | Where-Object { $_.Name -ne "OBDInsight.db" } | ForEach-Object {
+                          $destPath = $_.FullName.Replace($source, $destination)
+                          if ($_.PSIsContainer) {
+                              if (-not (Test-Path $destPath)) { New-Item -ItemType Directory -Path $destPath | Out-Null }
+                          } else {
+                              Copy-Item $_.FullName $destPath -Force
+                          }
+                      }
+                      Write-Host "Files copied to $destination (SQLite DB preserved)"
+
+                      # Start app pool
+                      Start-WebAppPool -Name "$(appPoolName)"
+                      Write-Host "App pool started"
+
+                      # Ensure website is running
+                      $site = Get-Website -Name "$(websiteName)"
+                      if ($site.State -ne 'Started') {
+                          Start-Website -Name "$(websiteName)"
+                      }
+                      Write-Host "Website is running"
+
+                      # Health check
+                      Start-Sleep -Seconds 5
+                      try {
+                          $response = Invoke-WebRequest -Uri "http://localhost" -UseBasicParsing
+                          Write-Host "Health check passed: $($response.StatusCode)"
+                      } catch {
+                          Write-Warning "Health check failed: $_"
+                      }

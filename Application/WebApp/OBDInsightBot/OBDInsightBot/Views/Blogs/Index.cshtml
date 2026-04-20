@@ -1,0 +1,299 @@
+@model IEnumerable<OBDInsightBot.Models.BlogPost>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "_HomeLayout";
+}
+
+
+<div class="container-fluid">
+    <div class="hero-card shadow mb-5">
+        <section style="max-width: 85ch;">
+            <h1 style="font-weight:900;">Driving a sustainable future.</h1>
+            <p>
+                OBD Insight Bot empowers you and your vehicle to build a cleaner, more sustainable future.
+                Stay informed, manage your car's maintenance with confidence, and receive timely alerts to
+                keep everything running smoothly and efficiently.
+            </p>
+        </section>
+
+        <section>
+            <a href="#MainBlogs" style="color: white;">
+
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-arrow-right-circle-fill" viewBox="0 0 16 16">
+                    <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0M4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5z" />
+                </svg>
+
+
+            </a>
+        </section>
+    </div>
+</div>
+
+<style>
+    .hero-card {
+        min-height: 90vh;
+        padding: 45px;
+        border-radius: 18px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        background-image: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.25) 40%, rgba(0,0,0,0) 75%), url('/branding/Blog/BlogImage.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        color: #fff;
+    }
+
+        .hero-card p {
+            margin-bottom: 0;
+            max-width: 70ch;
+        }
+
+    .blog-card {
+        height: 320px;
+        padding: 28px;
+        border-radius: 18px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        color: #fff;
+        overflow: hidden;
+    }
+
+        .blog-card p {
+            margin-bottom: 0;
+            max-width: 70ch;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .blog-card a {
+            color: white;
+        }
+
+        .blog-card svg {
+            color: white;
+            transition: transform 0.2s;
+        }
+
+        .blog-card:hover svg {
+            transform: translateX(4px);
+        }
+
+    .blog-post-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0.75rem;
+        border-bottom: 1px solid var(--border-color, #2a2a2a);
+        border-radius: 6px;
+        transition: background 0.15s;
+        text-decoration: none;
+        color: inherit;
+    }
+
+        .blog-post-row:hover {
+            background: rgba(255,255,255,0.04);
+        }
+
+        .blog-post-row svg {
+            flex-shrink: 0;
+            color: white;
+            transition: transform 0.2s;
+        }
+
+        .blog-post-row:hover svg {
+            transform: translateX(4px);
+        }
+
+    .Side-Image-card {
+        min-height: 75vh;
+        border-radius: 18px;
+        background-image: url('/branding/Blog/InTheWoods.png');
+        background-size: cover;
+        background-position: left;
+        background-repeat: no-repeat;
+        overflow: hidden;
+    }
+
+    .sticky-left {
+        position: sticky;
+        top: 1rem;
+        align-self: flex-start;
+    }
+
+    .section-label-group {
+        margin-bottom: 1.5rem;
+    }
+</style>
+
+
+<div class="container" id="MainBlogs">
+    <div class="section-label-group">
+        <span class="text-label d-block mb-2">LATEST CONTENT</span>
+        <div class="accent-line"></div>
+        <h2 class="text-heading mt-2">Featured Posts</h2>
+    </div>
+
+    <div class="row g-4">
+        @{
+            int counter = 0;
+
+            foreach (BlogPost blogPost in Model)
+            {
+                if (counter < 3)
+                {
+                    <div class="col-12 col-md-4">
+                        <div class="blog-card shadow"
+                             style="background-image:
+                    linear-gradient(to bottom, rgba(0,0,0,0.70) 0%, rgba(0,0,0,0.30) 50%, rgba(0,0,0,0.60) 100%),
+                    url('@(blogPost.PathForFeaturedImage ?? "/branding/Blog/BlogImage.png")');">
+                            <div>
+                                <h3 style="font-weight:900; font-size: 1.25rem;">@blogPost.Title</h3>
+                                <p>@blogPost.MiniDescription</p>
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <a asp-action="Article" asp-route-Id="@blogPost.Id">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-arrow-right-circle-fill" viewBox="0 0 16 16">
+                                        <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0M4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5z" />
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    counter = counter + 1;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+    </div>
+</div>
+
+
+<div class="container" id="MoreBlogs" style="margin-top: 60px; margin-bottom: 60px;">
+    <div class="row g-4">
+        <div class="col-12 col-md-5">
+            <div class="Side-Image-card shadow sticky-left">
+            </div>
+        </div>
+
+        <div class="col-12 col-md-7">
+            <div class="section-label-group">
+                <span class="text-label d-block mb-2">ALL POSTS</span>
+                <div class="accent-line"></div>
+                <h2 class="text-heading mt-2">More Posts</h2>
+            </div>
+
+            @{
+                int counterSec = 0;
+
+                foreach (BlogPost blogPost in Model)
+                {
+                    if (counterSec < 3)
+                    {
+                        counterSec++;
+                    }
+                    else
+                    {
+                        counterSec++;
+                        <a asp-action="Article" asp-route-Id="@blogPost.Id" class="blog-post-row d-flex">
+                            <div>
+                                <h4 class="text-subheading mb-1" style="font-size: 1rem;">@blogPost.Title</h4>
+                                <p class="text-body-lg mb-1" style="font-size: 0.8rem; opacity: 0.6;">@blogPost.PostedAt.ToString("dd MMM yyyy")</p>
+                                <p class="text-body-lg mb-0" style="font-size: 0.875rem;">@blogPost.MiniDescription</p>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-arrow-right-circle-fill ms-3" viewBox="0 0 16 16">
+                                <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0M4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5z" />
+                            </svg>
+                        </a>
+                    }
+                }
+            }
+        </div>
+    </div>
+</div>
+
+
+<style>
+    /* Override Bootstrap primary button */
+    .btn-primary {
+        background-color: #0f62fe;
+        border-color: #0f62fe;
+    }
+
+        .btn-primary:hover {
+            background-color: #0353e9;
+            border-color: #0353e9;
+        }
+
+    /* Footer section */
+    .footer-section {
+        border-top: 1px solid var(--border-color, #2a2a2a);
+    }
+
+    [data-theme="light"] .text-display,
+    [data-theme="light"] .text-heading,
+    [data-theme="light"] .text-subheading {
+        color: var(--text-primary);
+    }
+
+    [data-theme="light"] .text-body-lg {
+        color: var(--text-secondary);
+    }
+
+    [data-theme="light"] .text-label {
+        color: var(--accent-primary);
+    }
+
+    [data-theme="light"] .blog-post-row {
+        border-bottom-color: var(--border-color);
+        color: var(--text-primary);
+    }
+
+        [data-theme="light"] .blog-post-row svg {
+            color: var(--accent-primary);
+        }
+
+    [data-theme="light"] .footer-section {
+        border-top-color: var(--border-color);
+    }
+</style>
+
+
+
+<!-- FOOTER -->
+<footer class="container-fluid section-padding-sm bg-dark-primary footer-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6 mb-3 mb-md-0">
+                <div class="d-flex align-items-center">
+                    <div class="feature-icon me-3" style="width: 40px; height: 40px; margin-bottom: 0;">
+                        <i class="fas fa-car" style="font-size: 1rem;"></i>
+                    </div>
+                    <div>
+                        <span class="text-white fw-semibold d-block" style="font-size: 0.875rem;">Vehicle Intelligence Platform</span>
+                        <span class="text-body-lg" style="font-size: 0.8125rem;">Powered by IBM Granite AI</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <p class="text-body-lg mb-1" style="font-size: 0.8125rem;">
+                    University Of Hull CPD Project for IBM.
+                </p>
+                <p class="text-body-lg mb-0" style="font-size: 0.8125rem;">
+                    By using this platform, you agree to our <a asp-controller="home" asp-action="Privacy" class="text-primary text-decoration-none">Terms</a>
+                    and <a asp-controller="home" asp-action="Privacy" class="text-primary text-decoration-none">Privacy Policy</a> <a asp-controller="Blogs" asp-action="Admin" class="text-primary text-decoration-none">Manage</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>

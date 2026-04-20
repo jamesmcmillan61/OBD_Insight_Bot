@@ -1,0 +1,17 @@
+# OBD InsightBot API - Lightweight Dependencies
+# =============================================
+# Use this if you don't need the LLM model (rule-based only)
+
+# Web Framework
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+python-multipart>=0.0.6
+
+# Data Validation
+pydantic>=2.5.0
+
+# Utilities
+python-dotenv>=1.0.0
+
+# Production Server
+gunicorn>=21.2.0

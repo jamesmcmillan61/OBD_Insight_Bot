@@ -1,0 +1,272 @@
+﻿@{
+    Guid? selectedSessionID = ViewBag.SelectedSessionID ?? null;
+    UserOBDData? MyCardata = ViewBag.selectedcarOBDData ?? null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewData["Title"] - OBD Insight BOT | IBM | University Of Hull</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+    <style>
+        /* Theme Variables */
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #161616;
+            --bg-elevated: #1a1a1a;
+            --bg-surface: #262626;
+            --border-color: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #c6c6c6;
+            --text-muted: #a8a8a8;
+            --text-subtle: #6f6f6f;
+            --accent-primary: #0f62fe;
+            --accent-success: #24a148;
+            --accent-danger: #fa4d56;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f4f4f4;
+            --bg-elevated: #ffffff;
+            --bg-surface: #e0e0e0;
+            --border-color: #d0d0d0;
+            --text-primary: #161616;
+            --text-secondary: #525252;
+            --text-muted: #6f6f6f;
+            --text-subtle: #8d8d8d;
+            --accent-primary: #0f62fe;
+            --accent-success: #24a148;
+            --accent-danger: #da1e28;
+        }
+
+        body {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* APP BAR */
+        .appbar {
+            height: 48px;
+            background-color: #0a0a0a;
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+        }
+
+        .appbar-title {
+            font-weight: 500;
+            margin-left: 1rem;
+            color: #ffffff;
+        }
+
+        .icon-btn {
+            border-radius: 6px;
+            color: white;
+        }
+
+            .icon-btn:hover {
+                background-color: rgba(255,255,255,0.1);
+            }
+
+        /* SIDEBAR */
+        .sidebar {
+            background-color: #0a0a0a;
+            min-height: calc(100vh - 48px);
+            transition: width 0.2s ease;
+        }
+
+            .sidebar.collapsed {
+                width: 0;
+                overflow: hidden;
+            }
+
+        /* MAIN CONTENT */
+        .main-content {
+            background-color: var(--bg-secondary);
+            min-height: calc(100vh - 48px);
+            transition: background-color 0.3s ease;
+        }
+
+        /* Theme-aware styling for landing page */
+        [data-theme="light"] .text-white {
+            color: var(--text-primary) !important;
+        }
+
+        [data-theme="light"] .text-heading,
+        [data-theme="light"] .text-subheading,
+        [data-theme="light"] .text-display {
+            color: var(--text-primary);
+        }
+
+        [data-theme="light"] .text-body-lg {
+            color: var(--text-secondary);
+        }
+
+        /* Light theme section backgrounds */
+        [data-theme="light"] .bg-dark-primary {
+            background-color: var(--bg-primary) !important;
+        }
+
+        [data-theme="light"] .bg-dark-secondary {
+            background-color: var(--bg-secondary) !important;
+        }
+
+        [data-theme="light"] .bg-dark-elevated {
+            background-color: var(--bg-elevated) !important;
+        }
+
+        [data-theme="light"] .bg-dark-surface {
+            background-color: var(--bg-surface) !important;
+        }
+
+        /* Light theme hero visual */
+        [data-theme="light"] .hero-visual {
+            background: linear-gradient(135deg, #e8f0fe 0%, #d2e3fc 100%);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="light"] .hero-visual i {
+            color: var(--accent-primary);
+        }
+
+        [data-theme="light"] .hero-visual h5,
+        [data-theme="light"] .hero-visual p {
+            color: var(--text-primary) !important;
+        }
+
+        /* Light theme step circle */
+        [data-theme="light"] .step-circle {
+            background-color: var(--accent-primary);
+            color: #ffffff;
+        }
+
+        /* Light theme feature icon */
+        [data-theme="light"] .feature-icon {
+            background-color: rgba(15, 98, 254, 0.1);
+        }
+
+        /* Light theme footer border */
+        [data-theme="light"] footer {
+            border-top-color: var(--border-color) !important;
+        }
+
+        /* Light theme CTA box */
+        [data-theme="light"] .cta-box {
+            background-color: var(--bg-elevated);
+            border-color: var(--border-color);
+        }
+
+        /* Light theme floating badge */
+        [data-theme="light"] .floating-badge {
+            background-color: var(--bg-elevated);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="light"] .floating-badge .text-white {
+            color: var(--text-primary) !important;
+        }
+
+        /* Light theme feature list */
+        [data-theme="light"] .feature-list li {
+            color: var(--text-secondary);
+        }
+
+        /* Light theme badge premium */
+        [data-theme="light"] .badge-premium {
+            background-color: rgba(15, 98, 254, 0.1);
+            color: var(--accent-primary);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- APP BAR -->
+    <header class="appbar">
+
+        <section>
+            <a asp-controller="Home" asp-action="Index" style="text-decoration: none;">
+                <span class="appbar-title ms-3"><strong>IBM Insight Bot</strong></span>
+
+            </a>
+        </section>
+        
+
+        <div class="ms-auto d-flex align-items-center gap-1">
+
+            <!-- INFORMATION -->
+            <a class="icon-btn"
+               asp-controller="Blogs"
+               asp-action="Index"
+               title="Blog">
+                <i class="bi bi-book-half"></i>
+            </a>
+
+            <a class="icon-btn"
+               asp-controller="Help"
+               asp-action="Index"
+               title="Information">
+                <i class="bi bi-info-circle"></i>
+            </a>
+
+            <!-- SETTINGS -->
+            <a class="icon-btn"
+               asp-controller="Settings"
+               asp-action="Index"
+               title="Settings">
+                <i class="bi bi-gear"></i>
+            </a>
+
+        </div>
+    </header>
+
+
+    <!-- LAYOUT -->
+    <div class="">
+
+            <!-- MAIN CONTENT -->
+            <main>
+                @RenderBody()
+            </main>
+
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+        }
+
+        // Theme Management
+        (function() {
+            const savedTheme = localStorage.getItem('obd-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('obd-theme', theme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        }
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

@@ -1,0 +1,156 @@
+﻿<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+@{
+    Layout = "_ChatLayout";
+}
+@model UserOBDData
+
+<section class="d-block d-md-flex justify-content-between">
+    <h1 class="text-heading">Your car data</h1>
+
+    <a asp-controller="Chat" asp-action="LetsChat" asp-route-SessionID="@ViewBag.SelectedSessionID" class="btn" style="color: white;">
+        ← To Chat
+    </a>
+</section>
+
+
+<div class="row g-4 mt-3">
+
+    <!-- VEHICLE INFO -->
+    <div class="col-md-6">
+        <div class="card-premium">
+            <div class="text-subheading">Vehicle Information</div>
+            <div class="accent-line"></div>
+
+            <p><strong>Uploaded At:</strong> @Model.UploadedAt</p>
+            <p><strong>Mark:</strong> @(Model.Mark ?? "No data")</p>
+            <p><strong>Model:</strong> @(Model.Model ?? "No data")</p>
+            <p><strong>Car Year:</strong> @(Model.CarYear ?? "No data")</p>
+            <p><strong>Engine Power:</strong> @(Model.EnginePower ?? "No data")</p>
+            <p><strong>Automatic:</strong> @(Model.Automatic ?? "No data")</p>
+            <p><strong>Vehicle ID:</strong> @(Model.VehicleId ?? "No data")</p>
+        </div>
+    </div>
+
+    <!-- SENSOR DATA -->
+    <div class="col-md-6">
+        <div class="card-premium">
+            <div class="text-subheading">Sensor Data</div>
+            <div class="accent-line"></div>
+
+            <p><strong>Barometric Pressure (kPa):</strong> @(Model.BarometricPressureKpa ?? "No data")</p>
+            <p><strong>Engine Coolant Temp:</strong> @(Model.EngineCoolantTemp ?? "No data")</p>
+            <p><strong>Fuel Level:</strong> @(Model.FuelLevel ?? "No data")</p>
+            <p><strong>Engine Load:</strong> @(Model.EngineLoad ?? "No data")</p>
+            <p><strong>Ambient Air Temp:</strong> @(Model.AmbientAirTemp ?? "No data")</p>
+            <p><strong>Engine RPM:</strong> @(Model.EngineRpm ?? "No data")</p>
+            <p><strong>Intake Pressure:</strong> @(Model.IntakeManifoldPressure ?? "No data")</p>
+            <p><strong>MAF:</strong> @(Model.Maf ?? "No data")</p>
+        </div>
+    </div>
+
+    <!-- DIAGNOSTICS -->
+    <div class="col-md-6">
+        <div class="card-premium">
+            <div class="text-subheading">Diagnostics</div>
+            <div class="accent-line"></div>
+
+            <p><strong>DTC Number:</strong> @(Model.DtcNumber ?? "No data")</p>
+            <p><strong>Trouble Codes:</strong> @(Model.TroubleCodes ?? "No data")</p>
+            <p><strong>Timing Advance:</strong> @(Model.TimingAdvance ?? "No data")</p>
+            <p><strong>Equiv Ratio:</strong> @(Model.EquivRatio ?? "No data")</p>
+        </div>
+    </div>
+
+    <!-- TIME BREAKDOWN -->
+    <div class="col-md-6">
+        <div class="card-premium">
+            <div class="text-subheading">Time Breakdown</div>
+            <div class="accent-line"></div>
+
+            <p><strong>Minutes:</strong> @(Model.Min ?? "No data")</p>
+            <p><strong>Hours:</strong> @(Model.Hours ?? "No data")</p>
+            <p><strong>Days of Week:</strong> @(Model.DaysOfWeek ?? "No data")</p>
+            <p><strong>Months:</strong> @(Model.Months ?? "No data")</p>
+            <p><strong>Year:</strong> @(Model.Year ?? "No data")</p>
+        </div>
+    </div>
+
+</div>
+
+@* <div class="row">
+    <div class="col-3">
+        <div>
+            <div>
+                <canvas id="MyFuelChart"></canvas>
+            </div>
+
+            <!-- Load Chart.js -->
+            <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+            <script>
+                // 1) Prepare your labels and data FIRST
+                const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
+
+                // Helper to generate numbers like Utils.numbers
+                function genNumbers(count, min = -100, max = 100) {
+                  const arr = [];
+                  for (let i = 0; i < count; i++) {
+                    arr.push(Math.round(Math.random() * (max - min) + min));
+                  }
+                  return arr;
+                }
+
+                // Some colors to replace Utils.CHART_COLORS
+                const COLORS = {
+                  red:   'rgba(255, 99, 132, 0.7)',
+                  blue:  'rgba(54, 162, 235, 0.7)',
+                  green: 'rgba(75, 192, 192, 0.7)'
+                };
+
+                const data = {
+                  labels,
+                  datasets: [
+                    {
+                      label: 'Fuel level',
+                      data: genNumbers(labels.length),
+                      backgroundColor: COLORS.green,
+                    },
+                    {
+                      label: 'Full',
+                      data: genNumbers(labels.length),
+                      backgroundColor: COLORS.red,
+                    },
+                    
+                  ]
+                };
+
+                // 2) Then build the config that uses `data`
+                const config = {
+                  type: 'bar',
+                  data,
+                  options: {
+                    responsive: true,
+                    plugins: {
+                      title: {
+                        display: true,
+                        text: 'Your fuel level'
+                      },
+                      legend: {
+                        position: 'bottom'
+                      }
+                    },
+                    scales: {
+                      x: { stacked: true },
+                      y: { stacked: true }
+                    }
+                  }
+                };
+
+                // 3) Finally, create the chart
+                const ctx = document.getElementById('MyFuelChart');
+                // You can pass either the canvas element or its 2D context. Both work in v3/v4.
+                new Chart(ctx, config);
+            </script>
+        </div>
+    </div>
+</div> *@

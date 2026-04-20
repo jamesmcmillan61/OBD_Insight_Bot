@@ -1,0 +1,216 @@
+﻿@model List<TopicAnalytic>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+@{
+    ViewData["Title"] = "Topic Analytics";
+    Layout = "_ChatLayout";
+}
+
+
+<!-- TOP LINE FIGS-->
+@{
+    var now = DateTime.Now;
+    DateOnly today = DateOnly.FromDateTime(now);
+
+    List<TopicAnalytic> todaysFigs =
+    Model.Where(t => t.Date == today)
+    .OrderByDescending(t => t.TopicCount)
+    .ToList();
+
+    TopicAnalytic? todaysTop = todaysFigs.FirstOrDefault();
+    TopicAnalytic? secondTop = todaysFigs.ElementAtOrDefault(1);
+}
+
+
+<section class="d-block d-md-flex justify-content-between">
+    <section>
+        <h1 class="text-heading">Analytics</h1>
+        <h2>Topics </h2>
+    </section>
+
+
+    <a asp-controller="Analytics" asp-action="Index" class="btn" style="color: white;"><span style="color: white;"> Useage insights -> </span> </a>
+</section>
+
+
+<!-- Stats Row -->
+<div class="row mt-4">
+    @if (todaysFigs.Count() == 0)
+    {
+        <p style="text-align: center;"> No data avalible </p>
+    }
+    else
+    {
+        <div class="col-md-6">
+            <div class="card-premium stat-item">
+                <div class="stat-number">@todaysTop.TopicName.ToString()</div>
+                <div class="stat-label">Todays top topic</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card-premium stat-item">
+                <div class="stat-number">@todaysTop.TopicCount</div>
+                <div class="stat-label">Questions about @todaysTop.TopicName.ToString()</div>
+            </div>
+        </div>
+        if (secondTop != null)
+        {
+            <div class="col-md-3">
+                <div class="card-premium stat-item">
+                    <div class="stat-number">@secondTop.TopicCount</div>
+                    <div class="stat-label">Questions about @secondTop.TopicName.ToString()</div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <p>No Data.</p>
+        }
+
+
+    }
+
+</div>
+
+
+<section style="max-width: 100%;">
+
+
+
+    <section class="col-12 col-sm-9 col-lg-10 p-0">
+
+
+
+
+    @{
+        // All dates in the model
+        var allDates = Model
+        .Select(x => x.Date)
+        .Distinct()
+        .OrderBy(d => d)
+        .ToList();
+
+        // All topic names in the enum
+        var allTopics = Enum.GetValues<TopicAnalytic.TopicType>().ToList();
+
+        // Build a dictionary for Chart.js data structure:
+        // Each dataset = one topic; values = counts per date (filling missing with 0)
+        var chartData = new Dictionary<string, List<int>>();
+
+        foreach (var topic in allTopics)
+        {
+            var counts = new List<int>();
+
+            foreach (var day in allDates)
+            {
+                var record = Model
+                .FirstOrDefault(x => x.Date == day && x.TopicName == topic);
+
+                counts.Add(record?.TopicCount ?? 0); // Missing values → 0
+            }
+
+            chartData.Add(topic.ToString(), counts);
+        }
+
+
+        // Convert Razor C# to JSON for Chart.js
+        var jsonDates = System.Text.Json.JsonSerializer.Serialize(allDates.Select(d => d.ToString()));
+        var jsonDatasets = System.Text.Json.JsonSerializer.Serialize(chartData);
+    }
+
+    <h3 class="mt-5">Topic Activity by Day</h3>
+    <div class="card-premium p-3" style="max-width:95ch;">
+        <canvas id="topicChart" style="max-height: 80vh; width:100%; color: white;"></canvas>
+    </div>
+
+    <script>
+        const labels = @Html.Raw(jsonDates);
+        const rawData = @Html.Raw(jsonDatasets);
+
+        const datasets = Object.keys(rawData).map(topic => ({
+            label: topic,
+            data: rawData[topic],
+            borderWidth: 1,
+            backgroundColor: getColor(topic),
+            borderColor: "#333"
+        }));
+
+        // Simple colour palette function
+        function getColor(topic) {
+            const colors = {
+                Fuel: "rgba(75, 192, 192, 0.6)",
+                Temperature: "rgba(255, 99, 132, 0.6)",
+                Rpm: "rgba(255, 206, 86, 0.6)",
+                Speed: "rgba(54, 162, 235, 0.6)",
+                Engine: "rgba(153, 102, 255, 0.6)",
+                FuelLevel: "rgba(255, 159, 64, 0.6)",
+                EngineCoolantTemp: "rgba(99, 255, 132, 0.6)",
+                EngineRpm: "rgba(132, 99, 255, 0.6)",
+                TroubleCodes: "rgba(255, 99, 255, 0.6)"
+            };
+            return colors[topic] || "rgba(150,150,150,0.6)";
+        }
+
+        const ctx = document.getElementById('topicChart').getContext('2d');
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    </script>
+
+
+
+
+
+  
+</section>
+
+</section>
+
+
+    <div class="card-premium mt-4 p-4">
+        <h3 class="text-subheading mb-3">Session Data</h3>
+
+        <table class="table mt-3" style="color: white;">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Topic</th>
+                    <th>Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+
+                            <td>@item.Date</td>
+                            <td>@item.TopicName</td>
+                            <td>@item.TopicCount</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">No analytics data available.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>

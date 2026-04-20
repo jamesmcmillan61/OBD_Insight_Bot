@@ -1,0 +1,121 @@
+﻿@model IEnumerable<OBDInsightBot.Models.BlogPost>
+
+@{
+    ViewData["Title"] = "Blogs - Manage";
+    Layout = "_ChatLayout";
+}
+
+<h1>Blog posts</h1>
+
+@{
+
+    // Blogs
+
+    // Pick the most recent post by PostedAt; null if none exist
+    BlogPost? latestPost = Model
+        .OrderByDescending(p => p.PostedAt)
+        .FirstOrDefault();
+
+}
+
+<!-- Blogs TABLE -->
+<div class="card-premium mt-4 p-4">
+    <section class="d-block d-md-flex justify-content-between">
+        <h3 class="text-subheading mb-3">Blog's</h3>
+
+        <a asp-action="Create" class="btn btn-danger">Create New</a>
+    </section>
+
+    <section>
+        <div class="row mt-4">
+
+            <div class="col-md-6">
+                <div class="card-premium stat-item">
+                    <div class="stat-number">@Model.Count()</div>
+                    <div class="stat-label">Visible blog posts</div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card-premium stat-item">
+                    @if (latestPost != null)
+                    {
+                        <div class="stat-number">@latestPost.PostedAt.ToString("dd MMM yyyy")</div>
+                        <div class="stat-label">last post</div>
+                    }
+
+                </div>
+            </div>
+
+            <section class="mt-3 table-responsive">
+
+                <table class="table  mt-3" style="color: white;">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Headline</th>
+                            <th>Posted at</th>
+                            <th>Visible</th>
+                            <th></th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        @if (item.PathForFeaturedImage != null && item.PathForFeaturedImage != "")
+                                        {
+                                            <img src="@item.PathForFeaturedImage" style="max-width: 150px; max-height:50px; border-radius:15px;" />
+                                        }
+                                        else
+                                        {
+                                            <span> No Image</span>
+                                        }
+                                    </td>
+                                    <td>@item.Title</td>
+                                    <td>@item.PostedAt.ToString("dd MMM yyyy")</td>
+                                    <td>
+                                        @if (item.IsHidden)
+                                        {
+                                            <span class="text-danger">Hidden</span>
+
+                                        }
+                                        else
+                                        {
+                                            <span class="text-success">Visible</span>
+
+                                        }
+
+                                    </td>
+                                    <td class="text-end">
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn" style="color: white;"><span style="color: white;">Update -> </span> </a>
+                                    <br/>
+                                    
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn" style="color: red;"><span style="color: white;">Delete -> </span> </a>
+
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">No analytics data available.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+            </section>
+
+        </div>
+
+    </section>
+</div>
+
+

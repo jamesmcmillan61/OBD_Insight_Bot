@@ -1,0 +1,62 @@
+@{
+    Layout = "_ChatLayout";
+    ViewData["Title"] = "Terms of Use";
+}
+
+<div class="d-flex align-items-center justify-content-center" style="min-height: calc(100vh - 200px);">
+    <div class="card-premium p-5" style="max-width: 640px; width: 100%;">
+
+        <div class="text-center mb-4">
+            <div class="feature-icon mx-auto mb-4" style="background-color: #0f62fe;">
+                <i class="bi bi-shield-check" style="font-size: 1.5rem; color: #ffffff;"></i>
+            </div>
+            <h1 class="text-heading text-white mb-2">Before You Continue</h1>
+            <div class="accent-line accent-line-center"></div>
+        </div>
+
+        <div class="text-body-lg mb-4" style="color: #c6c6c6;">
+            <p class="mb-3">
+                This application is provided for <strong class="text-white">informational and educational purposes only</strong>.
+                It is not a substitute for professional automotive advice, diagnosis, or repair.
+            </p>
+            <p class="mb-3">
+                Do not rely solely on the information presented here when making decisions about your vehicle.
+                Always consult a qualified mechanic or professional for any maintenance or safety concerns.
+            </p>
+            <p class="mb-0">
+                By proceeding, you acknowledge and agree that you understand these terms
+                and accept full responsibility for any actions taken based on the information provided.
+            </p>
+        </div>
+
+        <div class="d-flex flex-wrap gap-3 justify-content-end pt-3" style="border-top: 1px solid #2a2a2a;">
+            <a asp-controller="Chat"
+               asp-action="TandCDisagree"
+               class="btn btn-premium btn-premium-outline">
+                I Do Not Agree
+            </a>
+
+            <a asp-controller="Chat"
+               asp-action="TandCAgree"
+               class="btn btn-premium btn-premium-primary">
+                <i class="bi bi-check-lg me-2"></i>I Agree and Continue
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .feature-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .accent-line-center {
+        margin-left: auto;
+        margin-right: auto;
+    }
+</style>

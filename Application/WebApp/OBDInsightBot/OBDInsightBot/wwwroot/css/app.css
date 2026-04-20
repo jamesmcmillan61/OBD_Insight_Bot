@@ -1,0 +1,893 @@
+/* IBM Design Language - Global Styles */
+
+/* Inter - Professional geometric font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+:root {
+    /* Theme Variables */
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #161616;
+    --bg-elevated: #1a1a1a;
+    --bg-surface: #262626;
+    --border-color: #2a2a2a;
+    --border-color-strong: #525252;
+    --text-primary: #ffffff;
+    --text-secondary: #c6c6c6;
+    --text-muted: #a8a8a8;
+    --text-subtle: #8d8d8d; /* WCAG AA compliant - was #6f6f6f */
+    --accent-primary: #0f62fe;
+    --accent-success: #24a148;
+    --accent-danger: #fa4d56;
+
+    /* MudBlazor Variables */
+    --mud-palette-black: rgba(39, 44, 52, 1);
+    --mud-palette-white: rgba(255, 255, 255, 1);
+    --mud-palette-primary: rgba(15, 98, 254, 1);
+    --mud-palette-primary-rgb: 15, 98, 254;
+    --mud-palette-primary-text: rgba(255, 255, 255, 1);
+    --mud-palette-primary-darken: rgb(1, 82, 233);
+    --mud-palette-primary-lighten: rgb(52, 123, 254);
+    --mud-palette-primary-hover: rgba(15, 98, 254, 0.058823529411764705);
+    --mud-palette-secondary: rgba(57, 57, 57, 1);
+    --mud-palette-secondary-rgb: 57, 57, 57;
+    --mud-palette-secondary-text: rgba(255, 255, 255, 1);
+    --mud-palette-secondary-darken: rgb(39, 39, 39);
+    --mud-palette-secondary-lighten: rgb(77, 77, 77);
+    --mud-palette-secondary-hover: rgba(57, 57, 57, 0.058823529411764705);
+    --mud-palette-tertiary: rgba(130, 207, 255, 1);
+    --mud-palette-tertiary-rgb: 130, 207, 255;
+    --mud-palette-tertiary-text: rgba(255, 255, 255, 1);
+    --mud-palette-tertiary-darken: rgb(92, 192, 255);
+    --mud-palette-tertiary-lighten: rgb(163, 220, 255);
+    --mud-palette-tertiary-hover: rgba(130, 207, 255, 0.058823529411764705);
+    --mud-palette-info: rgba(33, 150, 243, 1);
+    --mud-palette-info-rgb: 33, 150, 243;
+    --mud-palette-info-text: rgba(255, 255, 255, 1);
+    --mud-palette-info-darken: rgb(12, 128, 223);
+    --mud-palette-info-lighten: rgb(71, 167, 245);
+    --mud-palette-info-hover: rgba(33, 150, 243, 0.058823529411764705);
+    --mud-palette-success: rgba(0, 200, 83, 1);
+    --mud-palette-success-rgb: 0, 200, 83;
+    --mud-palette-success-text: rgba(255, 255, 255, 1);
+    --mud-palette-success-darken: rgb(0, 163, 68);
+    --mud-palette-success-lighten: rgb(0, 235, 98);
+    --mud-palette-success-hover: rgba(0, 200, 83, 0.058823529411764705);
+    --mud-palette-warning: rgba(255, 152, 0, 1);
+    --mud-palette-warning-rgb: 255, 152, 0;
+    --mud-palette-warning-text: rgba(255, 255, 255, 1);
+    --mud-palette-warning-darken: rgb(214, 129, 0);
+    --mud-palette-warning-lighten: rgb(255, 167, 36);
+    --mud-palette-warning-hover: rgba(255, 152, 0, 0.058823529411764705);
+    --mud-palette-error: rgba(244, 67, 54, 1);
+    --mud-palette-error-rgb: 244, 67, 54;
+    --mud-palette-error-text: rgba(255, 255, 255, 1);
+    --mud-palette-error-darken: rgb(242, 28, 13);
+    --mud-palette-error-lighten: rgb(246, 96, 85);
+    --mud-palette-error-hover: rgba(244, 67, 54, 0.058823529411764705);
+    --mud-palette-dark: rgba(66, 66, 66, 1);
+    --mud-palette-dark-rgb: 66, 66, 66;
+    --mud-palette-dark-text: rgba(255, 255, 255, 1);
+    --mud-palette-dark-darken: rgb(46, 46, 46);
+    --mud-palette-dark-lighten: rgb(87, 87, 87);
+    --mud-palette-dark-hover: rgba(66, 66, 66, 0.058823529411764705);
+    --mud-palette-text-primary: rgba(22, 22, 22, 1);
+    --mud-palette-text-primary-rgb: 22, 22, 22;
+    --mud-palette-text-secondary: rgba(82, 82, 82, 1);
+    --mud-palette-text-secondary-rgb: 82, 82, 82;
+    --mud-palette-text-disabled: rgba(0, 0, 0, 0.3764705882352941);
+    --mud-palette-text-disabled-rgb: 0, 0, 0;
+    --mud-palette-action-default: rgba(0, 0, 0, 0.5372549019607843);
+    --mud-palette-action-default-hover: rgba(0, 0, 0, 0.058823529411764705);
+    --mud-palette-action-disabled: rgba(0, 0, 0, 0.25882352941176473);
+    --mud-palette-action-disabled-background: rgba(0, 0, 0, 0.11764705882352941);
+    --mud-palette-surface: rgba(255, 255, 255, 1);
+    --mud-palette-surface-rgb: 255, 255, 255;
+    --mud-palette-background: rgba(242, 244, 248, 1);
+    --mud-palette-background-gray: rgba(245, 245, 245, 1);
+    --mud-palette-drawer-background: rgba(0, 0, 0, 1);
+    --mud-palette-drawer-text: rgba(255, 255, 255, 1);
+    --mud-palette-drawer-icon: rgba(255, 255, 255, 1);
+    --mud-palette-appbar-background: rgba(0, 0, 0, 1);
+    --mud-palette-appbar-text: rgba(255, 255, 255, 1);
+    --mud-palette-lines-default: rgba(0, 0, 0, 0.11764705882352941);
+    --mud-palette-lines-inputs: rgba(189, 189, 189, 1);
+    --mud-palette-table-lines: rgba(224, 224, 224, 1);
+    --mud-palette-table-striped: rgba(0, 0, 0, 0.0196078431372549);
+    --mud-palette-table-hover: rgba(0, 0, 0, 0.0392156862745098);
+    --mud-palette-divider: rgba(224, 224, 224, 1);
+    --mud-palette-divider-rgb: 224, 224, 224;
+    --mud-palette-divider-light: rgba(0, 0, 0, 0.8);
+    --mud-palette-skeleton: rgba(0, 0, 0, 0.10980392156862745);
+    --mud-palette-gray-default: #9E9E9E;
+    --mud-palette-gray-light: #BDBDBD;
+    --mud-palette-gray-lighter: #E0E0E0;
+    --mud-palette-gray-dark: #757575;
+    --mud-palette-gray-darker: #616161;
+    --mud-palette-overlay-dark: rgba(33, 33, 33, 0.4980392156862745);
+    --mud-palette-overlay-light: rgba(255, 255, 255, 0.4980392156862745);
+    --mud-palette-border-opacity: 1;
+    --mud-ripple-color: var(--mud-palette-text-primary);
+    --mud-ripple-opacity: 0.1;
+    --mud-ripple-opacity-secondary: 0.2;
+    --mud-elevation-0: none;
+    --mud-elevation-1: 0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+    --mud-elevation-2: 0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
+    --mud-elevation-3: 0px 3px 3px -2px rgba(0, 0, 0, 0.2), 0px 3px 4px 0px rgba(0, 0, 0, 0.14), 0px 1px 8px 0px rgba(0, 0, 0, 0.12);
+    --mud-elevation-4: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+    --mud-elevation-5: 0px 3px 5px -1px rgba(0, 0, 0, 0.2), 0px 5px 8px 0px rgba(0, 0, 0, 0.14), 0px 1px 14px 0px rgba(0, 0, 0, 0.12);
+    --mud-elevation-6: 0px 3px 5px -1px rgba(0, 0, 0, 0.2), 0px 6px 10px 0px rgba(0, 0, 0, 0.14), 0px 1px 18px 0px rgba(0, 0, 0, 0.12);
+    --mud-elevation-7: 0px 4px 5px -2px rgba(0, 0, 0, 0.2), 0px 7px 10px 1px rgba(0, 0, 0, 0.14), 0px 2px 16px 1px rgba(0, 0, 0, 0.12);
+    --mud-elevation-8: 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+    --mud-elevation-9: 0px 5px 6px -3px rgba(0, 0, 0, 0.2), 0px 9px 12px 1px rgba(0, 0, 0, 0.14), 0px 3px 16px 2px rgba(0, 0, 0, 0.12);
+    --mud-elevation-10: 0px 6px 6px -3px rgba(0, 0, 0, 0.2), 0px 10px 14px 1px rgba(0, 0, 0, 0.14), 0px 4px 18px 3px rgba(0, 0, 0, 0.12);
+    --mud-elevation-11: 0px 6px 7px -4px rgba(0, 0, 0, 0.2), 0px 11px 15px 1px rgba(0, 0, 0, 0.14), 0px 4px 20px 3px rgba(0, 0, 0, 0.12);
+    --mud-elevation-12: 0px 7px 8px -4px rgba(0, 0, 0, 0.2), 0px 12px 17px 2px rgba(0, 0, 0, 0.14), 0px 5px 22px 4px rgba(0, 0, 0, 0.12);
+    --mud-elevation-13: 0px 7px 8px -4px rgba(0, 0, 0, 0.2), 0px 13px 19px 2px rgba(0, 0, 0, 0.14), 0px 5px 24px 4px rgba(0, 0, 0, 0.12);
+    --mud-elevation-14: 0px 7px 9px -4px rgba(0, 0, 0, 0.2), 0px 14px 21px 2px rgba(0, 0, 0, 0.14), 0px 5px 26px 4px rgba(0, 0, 0, 0.12);
+    --mud-elevation-15: 0px 8px 9px -5px rgba(0, 0, 0, 0.2), 0px 15px 22px 2px rgba(0, 0, 0, 0.14), 0px 6px 28px 5px rgba(0, 0, 0, 0.12);
+    --mud-elevation-16: 0px 8px 10px -5px rgba(0, 0, 0, 0.2), 0px 16px 24px 2px rgba(0, 0, 0, 0.14), 0px 6px 30px 5px rgba(0, 0, 0, 0.12);
+    --mud-elevation-17: 0px 8px 11px -5px rgba(0, 0, 0, 0.2), 0px 17px 26px 2px rgba(0, 0, 0, 0.14), 0px 6px 32px 5px rgba(0, 0, 0, 0.12);
+    --mud-elevation-18: 0px 9px 11px -5px rgba(0, 0, 0, 0.2), 0px 18px 28px 2px rgba(0, 0, 0, 0.14), 0px 7px 34px 6px rgba(0, 0, 0, 0.12);
+    --mud-elevation-19: 0px 9px 12px -6px rgba(0, 0, 0, 0.2), 0px 19px 29px 2px rgba(0, 0, 0, 0.14), 0px 7px 36px 6px rgba(0, 0, 0, 0.12);
+    --mud-elevation-20: 0px 10px 13px -6px rgba(0, 0, 0, 0.2), 0px 20px 31px 3px rgba(0, 0, 0, 0.14), 0px 8px 38px 7px rgba(0, 0, 0, 0.12);
+    --mud-elevation-21: 0px 10px 13px -6px rgba(0, 0, 0, 0.2), 0px 21px 33px 3px rgba(0, 0, 0, 0.14), 0px 8px 40px 7px rgba(0, 0, 0, 0.12);
+    --mud-elevation-22: 0px 10px 14px -6px rgba(0, 0, 0, 0.2), 0px 22px 35px 3px rgba(0, 0, 0, 0.14), 0px 8px 42px 7px rgba(0, 0, 0, 0.12);
+    --mud-elevation-23: 0px 11px 14px -7px rgba(0, 0, 0, 0.2), 0px 23px 36px 3px rgba(0, 0, 0, 0.14), 0px 9px 44px 8px rgba(0, 0, 0, 0.12);
+    --mud-elevation-24: 0px 11px 15px -7px rgba(0, 0, 0, 0.2), 0px 24px 38px 3px rgba(0, 0, 0, 0.14), 0px 9px 46px 8px rgba(0, 0, 0, 0.12);
+    --mud-elevation-25: 0 5px 5px -3px rgba(0, 0, 0, .06), 0 8px 10px 1px rgba(0, 0, 0, .042), 0 3px 14px 2px rgba(0, 0, 0, .036);
+    --mud-default-borderradius: 4px;
+    --mud-drawer-width-left: 240px;
+    --mud-drawer-width-right: 240px;
+    --mud-drawer-width-mini-left: 56px;
+    --mud-drawer-width-mini-right: 56px;
+    --mud-appbar-height: 64px;
+    --mud-typography-default-family: Roboto, Helvetica, Arial, sans-serif;
+    --mud-typography-default-size: .875rem;
+    --mud-typography-default-weight: 400;
+    --mud-typography-default-lineheight: 1.43;
+    --mud-typography-default-letterspacing: .01071em;
+    --mud-typography-default-text-transform: none;
+    --mud-typography-h1-family: Roboto, Helvetica, Arial, sans-serif;
+    --mud-typography-h1-size: 6rem;
+    --mud-typography-h1-weight: 300;
+    --mud-typography-h1-lineheight: 1.167;
+    --mud-typography-h1-letterspacing: -.01562em;
+    --mud-typography-h1-text-transform: none;
+    --mud-typography-h2-family: Roboto, Helvetica, Arial, sans-serif;
+    --mud-typography-h2-size: 3.75rem;
+    --mud-typography-h2-weight: 300;
+    --mud-typography-h2-lineheight: 1.2;
+    --mud-typography-h2-letterspacing: -.00833em;
+    --mud-typography-h2-text-transform: none;
+    --mud-typography-h3-family: Roboto, Helvetica, Arial, sans-serif;
+    --mud-typography-h3-size: 3rem;
+    --mud-typography-h3-weight: 400;
+    --mud-typography-h3-lineheight: 1.167;
+    --mud-typography-h3-letterspacing: 0;
+    --mud-typography-h3-text-transform: none;
+    --mud-typography-h4-family: Roboto, Helvetica, Arial, sans-serif;
+    --mud-typography-h4-size: 2.125rem;
+    --mud-typography-h4-weight: 400;
+    --mud-typography-h4-lineheight: 1.235;
+    --mud-typography-h4-letterspacing: .00735em;
+    --mud-typography-h4-text-transform: none;
+    --mud-typography-h5-family: Roboto, Helvetica, Arial, sans-serif;
+    --mud-typography-h5-size: 1.5rem;
+    --mud-typography-h5-weight: 400;
+    --mud-typography-h5-lineheight: 1.334;
+    --mud-typography-h5-letterspacing: 0;
+    --mud-typography-h5-text-transform: none;
+    --mud-typography-h6-family: Roboto, Helvetica, Arial, sans-serif;
+    --mud-typography-h6-size: 1.25rem;
+    --mud-typography-h6-weight: 500;
+    --mud-typography-h6-lineheight: 1.6;
+    --mud-typography-h6-letterspacing: .0075em;
+    --mud-typography-h6-text-transform: none;
+    --mud-typography-subtitle1-family: Roboto, Helvetica, Arial, sans-serif;
+    --mud-typography-subtitle1-size: 1rem;
+    --mud-typography-subtitle1-weight: 400;
+    --mud-typography-subtitle1-lineheight: 1.75;
+    --mud-typography-subtitle1-letterspacing: .00938em;
+    --mud-typography-subtitle1-text-transform: none;
+    --mud-typography-subtitle2-family: Roboto, Helvetica, Arial, sans-serif;
+    --mud-typography-subtitle2-size: .875rem;
+    --mud-typography-subtitle2-weight: 500;
+    --mud-typography-subtitle2-lineheight: 1.57;
+    --mud-typography-subtitle2-letterspacing: .00714em;
+    --mud-typography-subtitle2-text-transform: none;
+    --mud-typography-body1-family: Roboto, Helvetica, Arial, sans-serif;
+    --mud-typography-body1-size: 1rem;
+    --mud-typography-body1-weight: 400;
+    --mud-typography-body1-lineheight: 1.5;
+    --mud-typography-body1-letterspacing: .00938em;
+    --mud-typography-body1-text-transform: none;
+    --mud-typography-body2-family: Roboto, Helvetica, Arial, sans-serif;
+    --mud-typography-body2-size: .875rem;
+    --mud-typography-body2-weight: 400;
+    --mud-typography-body2-lineheight: 1.43;
+    --mud-typography-body2-letterspacing: .01071em;
+    --mud-typography-body2-text-transform: none;
+    --mud-typography-button-family: Roboto, Helvetica, Arial, sans-serif;
+    --mud-typography-button-size: .875rem;
+    --mud-typography-button-weight: 500;
+    --mud-typography-button-lineheight: 1.75;
+    --mud-typography-button-letterspacing: .02857em;
+    --mud-typography-button-text-transform: uppercase;
+    --mud-typography-caption-family: Roboto, Helvetica, Arial, sans-serif;
+    --mud-typography-caption-size: .75rem;
+    --mud-typography-caption-weight: 400;
+    --mud-typography-caption-lineheight: 1.66;
+    --mud-typography-caption-letterspacing: .03333em;
+    --mud-typography-caption-text-transform: none;
+    --mud-typography-overline-family: Roboto, Helvetica, Arial, sans-serif;
+    --mud-typography-overline-size: .75rem;
+    --mud-typography-overline-weight: 400;
+    --mud-typography-overline-lineheight: 2.66;
+    --mud-typography-overline-letterspacing: .08333em;
+    --mud-typography-overline-text-transform: none;
+    --mud-zindex-drawer: 1100;
+    --mud-zindex-appbar: 1300;
+    --mud-zindex-dialog: 1400;
+    --mud-zindex-popover: 1200;
+    --mud-zindex-snackbar: 1500;
+    --mud-zindex-tooltip: 1600;
+    --mud-native-html-color-scheme: light;
+}
+
+
+html, body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--bg-secondary, #161616);
+    color: var(--text-primary, #ffffff);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Override MudBlazor typography to use Inter */
+.mud-typography, .mud-typography-h1, .mud-typography-h2, .mud-typography-h3,
+.mud-typography-h4, .mud-typography-h5, .mud-typography-h6,
+.mud-typography-subtitle1, .mud-typography-subtitle2,
+.mud-typography-body1, .mud-typography-body2,
+.mud-typography-button, .mud-typography-caption, .mud-typography-overline,
+.mud-input, .mud-input-text, .mud-button-root,
+.mud-nav-link, .mud-chip, .mud-card, .mud-paper,
+.mud-dialog, .mud-snackbar, .mud-menu, .mud-list,
+.mud-table, .mud-tabs, .mud-drawer, .mud-appbar,
+.mud-chat-bubble, .mud-rating, .mud-alert,
+.sidebar-text, span, p, div {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+}
+
+/* Ensure all elements inherit Inter font */
+* {
+    font-family: inherit;
+}
+
+/* Links - IBM Blue */
+a, .btn-link {
+    color: #0f62fe;
+}
+
+a:hover {
+    color: #0043ce;
+}
+
+/* Focus states - IBM Blue */
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #0f62fe;
+}
+
+/* Form validation */
+.valid.modified:not([type=checkbox]) {
+    outline: 1px solid #24a148;
+}
+
+.invalid {
+    outline: 1px solid #da1e28;
+}
+
+.validation-message {
+    color: #da1e28;
+}
+
+/* Blazor error boundary - IBM Red */
+.blazor-error-boundary {
+    background: #da1e28;
+    padding: 1rem 1rem 1rem 1rem;
+    color: white;
+}
+
+.blazor-error-boundary::after {
+    content: "An error has occurred."
+}
+
+/* Smooth transitions */
+button, a, input, .mud-nav-link, .mud-button-root {
+    transition: all 0.15s ease;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c6c6c6;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #8d8d8d;
+}
+
+/* IBM Carbon Icons */
+.carbon-icon {
+    display: inline-block;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+.carbon-icon-white {
+    filter: brightness(0) invert(1);
+}
+
+.carbon-icon-primary {
+    filter: invert(28%) sepia(93%) saturate(1652%) hue-rotate(210deg) brightness(97%) contrast(107%);
+}
+
+.carbon-icon-secondary {
+    filter: invert(31%) sepia(0%) saturate(0%) hue-rotate(180deg) brightness(50%) contrast(90%);
+}
+
+
+
+/* ICON BUTTON (MudIconButton equivalent) */
+.icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    background: transparent;
+    border: none;
+    transition: background-color 0.15s ease;
+}
+
+    .icon-btn:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .icon-btn i {
+        font-size: 18px;
+    }
+
+
+.sidebar-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 1rem 0;
+}
+
+.sidebar-nav {
+    padding: 25px;
+}
+
+    .sidebar-nav .mud-nav-item {
+        margin: 0 !important;
+    }
+
+    .sidebar-nav .mud-nav-link {
+        justify-content: flex-start !important;
+    }
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start !important;
+    gap: 1.5rem;
+    padding: 0.75rem 1rem 0.75rem 0.75rem !important;
+    margin: 0.125rem 0.5rem 0.125rem 0 !important;
+    border-radius: 0 6px 6px 0 !important;
+    transition: background-color 0.15s ease;
+    text-decoration: none;
+    color: white;
+}
+
+    .sidebar-link:hover {
+        background-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    .sidebar-link.active {
+        background-color: rgba(15, 98, 254, 0.2) !important;
+    }
+
+.sidebar-text {
+    font-size: 0.8125rem;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+}
+
+.sidebar-divider {
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.08);
+    margin: 0.75rem 0.5rem 0.75rem 0.75rem;
+}
+
+
+/* ===========================================
+   PREMIUM UI DESIGN SYSTEM
+   Clean + Minimal + Professional + Bold
+   =========================================== */
+
+/* Light Theme Variables */
+[data-theme="light"] {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f4f4f4;
+    --bg-elevated: #ffffff;
+    --bg-surface: #e0e0e0;
+    --border-color: #d0d0d0;
+    --border-color-strong: #b0b0b0;
+    --text-primary: #161616;
+    --text-secondary: #525252;
+    --text-muted: #6f6f6f;
+    --text-subtle: #8d8d8d;
+    --accent-primary: #0f62fe;
+    --accent-success: #24a148;
+    --accent-danger: #da1e28;
+}
+
+/* Section Backgrounds (No Gradients) */
+.bg-dark-primary { background-color: #0a0a0a !important; }
+.bg-dark-secondary { background-color: #161616 !important; }
+.bg-dark-elevated { background-color: #1a1a1a !important; }
+.bg-dark-surface { background-color: #262626 !important; }
+
+/* Premium Card Component */
+.card-premium {
+    background: var(--bg-elevated, #1a1a1a);
+    border: 1px solid var(--border-color-strong, #525252);
+    border-radius: 12px;
+    padding: 2rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
+}
+
+.card-premium:hover {
+    border-color: var(--accent-primary, #0f62fe);
+    box-shadow: 0 0 0 1px var(--accent-primary, #0f62fe);
+}
+
+/* Light theme card adjustments */
+[data-theme="light"] .card-premium {
+    border-color: var(--border-color-strong);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+[data-theme="light"] .card-premium:hover {
+    box-shadow: 0 2px 8px rgba(15, 98, 254, 0.15);
+}
+
+/* Text Hierarchy */
+.text-display {
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+}
+
+.text-heading {
+    font-size: 1.75rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: #ffffff;
+}
+
+.text-subheading {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #e0e0e0;
+}
+
+.text-body-lg {
+    font-size: 1.125rem;
+    line-height: 1.7;
+    color: #a8a8a8;
+}
+
+.text-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #0f62fe;
+}
+
+/* Premium Buttons */
+.btn-premium {
+    padding: 0.875rem 2rem;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    border-radius: 8px;
+    border: none;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-premium:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(15, 98, 254, 0.3);
+}
+
+.btn-premium-primary {
+    background-color: #0f62fe;
+    color: #ffffff;
+}
+
+.btn-premium-primary:hover {
+    background-color: #0353e9;
+    color: #ffffff;
+}
+
+.btn-premium-outline {
+    background-color: transparent;
+    border: 1px solid #525252;
+    color: #ffffff;
+}
+
+.btn-premium-outline:hover {
+    border-color: #0f62fe;
+    color: #ffffff;
+}
+
+/* Accent Line (Brand Touch) */
+.accent-line {
+    width: 48px;
+    height: 3px;
+    background-color: #0f62fe;
+    margin-bottom: 1.5rem;
+    border-radius: 2px;
+}
+
+.accent-line-center {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Stats Components */
+.stat-item {
+    text-align: center;
+    padding: 1.5rem;
+}
+
+.stat-number {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #0f62fe;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.stat-number-success {
+    color: #24a148;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #a8a8a8;
+    line-height: 1.4;
+}
+
+/* Feature Icon Container */
+.feature-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    background-color: #0f62fe;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.feature-icon i {
+    font-size: 1.5rem;
+    color: #ffffff;
+}
+
+/* Step Circles */
+.step-circle {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background-color: #0f62fe;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.step-circle span {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+/* Section Spacing */
+.section-padding {
+    padding: 5rem 0;
+}
+
+.section-padding-sm {
+    padding: 3rem 0;
+}
+
+/* Badge Premium */
+.badge-premium {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background-color: rgba(15, 98, 254, 0.1);
+    border: 1px solid rgba(15, 98, 254, 0.2);
+    border-radius: 100px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #0f62fe;
+}
+
+/* CTA Box */
+.cta-box {
+    background-color: #161616;
+    border: 1px solid #2a2a2a;
+    border-radius: 16px;
+    padding: 3rem;
+}
+
+/* List Check Items */
+.list-check {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.list-check li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    color: #e0e0e0;
+    font-size: 0.9375rem;
+}
+
+.list-check li i {
+    color: #24a148;
+    margin-top: 0.125rem;
+}
+
+/* Hero Visual Container */
+.hero-visual {
+    background-color: #0f62fe;
+    border-radius: 16px;
+    padding: 3rem;
+    text-align: center;
+}
+
+.hero-visual i {
+    font-size: 5rem;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+}
+
+/* Floating Badge */
+.floating-badge {
+    position: absolute;
+    background-color: #161616;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Divider */
+.divider-vertical {
+    width: 1px;
+    background-color: #2a2a2a;
+    height: 100%;
+}
+
+/* Feature List Icons */
+.feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0 0 0;
+}
+
+.feature-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    color: #e0e0e0;
+    font-size: 0.875rem;
+}
+
+.feature-list li i {
+    color: #24a148;
+    font-size: 1rem;
+}
+
+/* ===========================================
+   LIGHT THEME OVERRIDES
+   =========================================== */
+
+[data-theme="light"] .text-display,
+[data-theme="light"] .text-heading,
+[data-theme="light"] .text-subheading {
+    color: var(--text-primary);
+}
+
+[data-theme="light"] .text-body-lg {
+    color: var(--text-secondary);
+}
+
+[data-theme="light"] .text-white {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="light"] .list-check li,
+[data-theme="light"] .feature-list li {
+    color: var(--text-secondary);
+}
+
+[data-theme="light"] .floating-badge {
+    background-color: var(--bg-elevated);
+    border-color: var(--border-color);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .divider-vertical {
+    background-color: var(--border-color);
+}
+
+[data-theme="light"] .cta-box {
+    background-color: var(--bg-secondary);
+    border-color: var(--border-color);
+}
+
+[data-theme="light"] .btn-premium-outline {
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+[data-theme="light"] .btn-premium-outline:hover {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+}
+
+/* ===========================================
+   ACCESSIBILITY IMPROVEMENTS
+   Focus states and keyboard navigation
+   =========================================== */
+
+/* Global focus-visible styles for keyboard navigation */
+*:focus-visible {
+    outline: 2px solid var(--accent-primary, #0f62fe);
+    outline-offset: 2px;
+}
+
+/* Remove default outline when using mouse */
+*:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* Button focus states */
+.btn-premium:focus-visible,
+button:focus-visible,
+.icon-btn:focus-visible {
+    outline: 2px solid var(--accent-primary, #0f62fe);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(15, 98, 254, 0.25);
+}
+
+/* Link focus states */
+a:focus-visible {
+    outline: 2px solid var(--accent-primary, #0f62fe);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* Input and form control focus states */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+.form-control:focus-visible {
+    outline: 2px solid var(--accent-primary, #0f62fe);
+    outline-offset: 0;
+    border-color: var(--accent-primary, #0f62fe);
+    box-shadow: 0 0 0 3px rgba(15, 98, 254, 0.15);
+}
+
+/* Card focus for keyboard navigation */
+.card-premium:focus-visible {
+    outline: 2px solid var(--accent-primary, #0f62fe);
+    outline-offset: 2px;
+}
+
+/* Sidebar link focus */
+.sidebar-link:focus-visible {
+    outline: 2px solid var(--accent-primary, #0f62fe);
+    outline-offset: -2px;
+    background-color: rgba(15, 98, 254, 0.15) !important;
+}
+
+/* Icon button enhanced focus */
+.icon-btn:focus-visible {
+    background-color: rgba(15, 98, 254, 0.2);
+}
+
+/* Skip link for screen readers */
+.skip-link {
+    position: absolute;
+    top: -100px;
+    left: 0;
+    background: var(--accent-primary, #0f62fe);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    z-index: 9999;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 0 0 8px 0;
+}
+
+.skip-link:focus {
+    top: 0;
+}
+
+/* Ensure minimum touch target size (44x44px) for mobile */
+@media (pointer: coarse) {
+    .icon-btn,
+    button,
+    a.btn,
+    .btn-premium {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    :root {
+        --border-color: #525252;
+        --border-color-strong: #8d8d8d;
+        --text-muted: #c6c6c6;
+        --text-subtle: #a8a8a8;
+    }
+
+    .card-premium {
+        border-width: 2px;
+    }
+
+    .btn-premium-outline {
+        border-width: 2px;
+    }
+}

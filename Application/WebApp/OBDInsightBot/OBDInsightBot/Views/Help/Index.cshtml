@@ -1,0 +1,156 @@
+@{
+    Layout = "_ChatLayout";
+    ViewData["Title"] = "Help & Information";
+}
+
+<div class="container py-4">
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="text-heading text-white mb-3">Help & Information</h1>
+        <div class="accent-line accent-line-center"></div>
+        <p class="text-body-lg" style="color: #c6c6c6; max-width: 600px; margin: 0 auto;">
+            Everything you need to know about using OBD Insight Bot
+        </p>
+    </div>
+
+    <!-- FAQ Cards -->
+    <div class="row g-4">
+
+        <!-- What is OBD-II? -->
+        <div class="col-lg-6">
+            <div class="card-premium p-4 h-100">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="help-icon me-3">
+                        <i class="bi bi-cpu"></i>
+                    </div>
+                    <h3 class="text-subheading text-white mb-0">What is OBD-II?</h3>
+                </div>
+                <p class="text-body-lg mb-0" style="color: #a8a8a8;">
+                    OBD-II (On-Board Diagnostics II) is a standardized system in vehicles since 1996 that monitors your car's performance.
+                    It records data from sensors throughout your vehicle and generates diagnostic trouble codes (DTCs) when issues are detected.
+                    An OBD-II scanner plugs into your car's diagnostic port (usually under the dashboard) to read this data.
+                </p>
+            </div>
+        </div>
+
+        <!-- What is IBM Granite-->
+        <div class="col-lg-6">
+            <div class="card-premium p-4 h-100">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="help-icon me-3">
+                        <i class="bi bi-robot"></i>
+                    </div>
+                    <h3 class="text-subheading text-white mb-0">What is IBM Granite?</h3>
+                </div>
+                <p class="text-body-lg mb-0" style="color: #a8a8a8;">
+                    IBM Granite is a form of LLM released in 2023,
+                    It is able to answer questions in plain english based on inferences on user inputs.
+                </p>
+                <ul class="text-body-lg mb-0" style="color: #a8a8a8; padding-left: 1.25rem;">
+                    <li>This version of IBM Granite has been tuned to answer vehicle diagnostic questions</li>
+                    <li>Currently running on IBM Granite-4.0-h-1b</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- How to Export Data -->
+        <div class="col-lg-6">
+            <div class="card-premium p-4 h-100">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="help-icon me-3">
+                        <i class="bi bi-download"></i>
+                    </div>
+                    <h3 class="text-subheading text-white mb-0">How to Export Your Data</h3>
+                </div>
+                <p class="text-body-lg mb-3" style="color: #a8a8a8;">
+                    Most OBD-II scanner apps allow you to export your vehicle data as a CSV file:
+                </p>
+                <ol class="text-body-lg mb-0" style="color: #a8a8a8; padding-left: 1.25rem;">
+                    <li>Connect your OBD-II scanner to your vehicle</li>
+                    <li>Use the scanner app to read diagnostic data</li>
+                    <li>Look for "Export" or "Share" option in the app</li>
+                    <li>Save the data as a CSV file</li>
+                    <li>Upload the CSV file to OBD Insight Bot</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Understanding Results -->
+        <div class="col-lg-6">
+            <div class="card-premium p-4 h-100">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="help-icon me-3">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <h3 class="text-subheading text-white mb-0">Understanding Your Results</h3>
+                </div>
+                <p class="text-body-lg mb-3" style="color: #a8a8a8;">
+                    Our AI analyzes your OBD data and provides:
+                </p>
+                <ul class="text-body-lg mb-0" style="color: #a8a8a8; padding-left: 1.25rem;">
+                    <li><strong class="text-white">Plain English explanations</strong> of any diagnostic codes</li>
+                    <li><strong class="text-white">Severity assessment</strong> to help you prioritize issues</li>
+                    <li><strong class="text-white">Repair suggestions</strong> with estimated costs</li>
+                    <li><strong class="text-white">Preventive maintenance</strong> recommendations</li>
+                </ul>
+            </div>
+        </div>
+
+    
+
+        <!-- Important Disclaimer -->
+        <div class="col-lg-12">
+            <div class="card-premium p-4 h-100" style="border-color: #525252;">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="help-icon me-3" style="background-color: rgba(250, 77, 86, 0.15); border-color: #fa4d56; color: #fa4d56;">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                    <h3 class="text-subheading text-white mb-0">Important Disclaimer</h3>
+                </div>
+                <p class="text-body-lg mb-0" style="color: #a8a8a8;">
+                    OBD Insight Bot is for <strong class="text-white">educational and informational purposes only</strong>.
+                    It is not a substitute for professional automotive diagnosis.
+                    Always consult a qualified mechanic before making repair decisions.
+                    We are not responsible for any actions taken based on the information provided.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- CTA -->
+    <div class="text-center mt-5">
+        <p class="text-body-lg mb-4" style="color: #c6c6c6;">
+            Ready to analyze your vehicle data?
+        </p>
+        <div class="d-flex flex-wrap gap-3 justify-content-center">
+            <a asp-controller="Help" asp-action="Example" class="btn btn-premium btn-premium-outline">
+                <i class="bi bi-box-arrow-up-right me-2"></i>View Example
+            </a>
+            <a asp-controller="Chat" asp-action="Index" class="btn btn-premium btn-premium-primary">
+                <i class="bi bi-chat-dots me-2"></i>Start Chatting
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .help-icon {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        border-radius: 10px;
+        background-color: rgba(15, 98, 254, 0.15);
+        border: 1px solid #0f62fe;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0f62fe;
+        font-size: 1.25rem;
+    }
+
+    .accent-line-center {
+        margin-left: auto;
+        margin-right: auto;
+    }
+</style>

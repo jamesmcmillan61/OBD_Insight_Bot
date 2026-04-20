@@ -1,0 +1,344 @@
+# Azure DevOps Pipeline for OBD InsightBot API
+# Python FastAPI deployment to Windows VM (no Docker)
+
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+  paths:
+    include:
+      - AI/obd-insightbot-api/**
+    exclude:
+      - docs/**
+      - README.md
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  pythonVersion: '3.11'
+  apiPath: 'AI/obd-insightbot-api'
+
+stages:
+  - stage: Build
+    displayName: 'Build and Test'
+    jobs:
+      - job: BuildJob
+        displayName: 'Build Python API'
+        steps:
+          # Set up Python
+          - task: UsePythonVersion@0
+            displayName: 'Use Python $(pythonVersion)'
+            inputs:
+              versionSpec: '$(pythonVersion)'
+              addToPath: true
+
+          # Install dependencies
+          - script: |
+              cd $(apiPath)
+              python -m pip install --upgrade pip
+              pip install -r requirements.txt
+              pip install pytest pytest-cov pytest-asyncio
+            displayName: 'Install dependencies'
+
+          # Run linting (optional)
+          - script: |
+              pip install flake8
+              cd $(apiPath)
+              flake8 app/ --max-line-length=120 --exclude=__pycache__,venv --count --statistics || true
+            displayName: 'Run code linting'
+
+          # Run tests
+          - script: |
+              cd $(apiPath)
+              pytest tests/ -v --junitxml=junit/test-results.xml --cov=app --cov-report=xml --cov-report=html
+            displayName: 'Run unit tests'
+            continueOnError: false
+
+          # Publish test results
+          - task: PublishTestResults@2
+            displayName: 'Publish test results'
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '$(apiPath)/junit/test-results.xml'
+              failTaskOnFailedTests: true
+
+          # Publish code coverage
+          - task: PublishCodeCoverageResults@1
+            displayName: 'Publish code coverage'
+            inputs:
+              codeCoverageTool: 'Cobertura'
+              summaryFileLocation: '$(apiPath)/coverage.xml'
+              reportDirectory: '$(apiPath)/htmlcov'
+
+          # Package the application
+          - task: ArchiveFiles@2
+            displayName: 'Archive API files'
+            inputs:
+              rootFolderOrFile: '$(apiPath)'
+              includeRootFolder: false
+              archiveType: 'zip'
+              archiveFile: '$(Build.ArtifactStagingDirectory)/api-package.zip'
+              replaceExistingArchive: true
+
+          # Publish build artifacts
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish artifacts'
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+              ArtifactName: 'api-drop'
+              publishLocation: 'Container'
+
+  - stage: Deploy_Dev
+    displayName: 'Deploy to Development'
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+    jobs:
+      - deployment: DeployDevWindows
+        displayName: 'Deploy to Dev Windows VM'
+        environment: 'dev-windows'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                # Download artifacts
+                - task: DownloadBuildArtifacts@1
+                  displayName: 'Download artifacts'
+                  inputs:
+                    buildType: 'current'
+                    downloadType: 'single'
+                    artifactName: 'api-drop'
+                    downloadPath: '$(System.ArtifactsDirectory)'
+
+                # Stop the API service
+                - task: PowerShellOnTargetMachines@3
+                  displayName: 'Stop API service'
+                  inputs:
+                    Machines: '$(windowsVMDev)'
+                    UserName: '$(vmUserDev)'
+                    UserPassword: '$(vmPasswordDev)'
+                    InlineScript: |
+                      # Stop the service if it exists
+                      $service = Get-Service -Name "OBDInsightBotAPI" -ErrorAction SilentlyContinue
+                      if ($service) {
+                          Stop-Service -Name "OBDInsightBotAPI" -Force
+                          Write-Host "Service stopped"
+                      } else {
+                          Write-Host "Service doesn't exist yet (first deployment)"
+                      }
+
+                # Copy files to Windows VM
+                - task: WindowsMachineFileCopy@2
+                  displayName: 'Copy files to Windows VM'
+                  inputs:
+                    SourcePath: '$(System.ArtifactsDirectory)/api-drop/api-package.zip'
+                    MachineNames: '$(windowsVMDev)'
+                    AdminUserName: '$(vmUserDev)'
+                    AdminPassword: '$(vmPasswordDev)'
+                    TargetPath: 'C:\Temp'
+
+                # Extract and deploy
+                - task: PowerShellOnTargetMachines@3
+                  displayName: 'Extract and deploy API'
+                  inputs:
+                    Machines: '$(windowsVMDev)'
+                    UserName: '$(vmUserDev)'
+                    UserPassword: '$(vmPasswordDev)'
+                    InlineScript: |
+                      # Create deployment directory
+                      $deployPath = "C:\Apps\OBDInsightBot-API"
+                      if (!(Test-Path $deployPath)) {
+                          New-Item -Path $deployPath -ItemType Directory -Force
+                      }
+
+                      # Extract files
+                      Expand-Archive -Path "C:\Temp\api-package.zip" -DestinationPath $deployPath -Force
+                      Write-Host "Files extracted to $deployPath"
+
+                      # Install/Update Python dependencies
+                      cd $deployPath
+                      python -m pip install --upgrade pip
+                      pip install -r requirements.txt
+
+                      Write-Host "Dependencies installed"
+
+                # Create/Update Windows Service
+                - task: PowerShellOnTargetMachines@3
+                  displayName: 'Create/Update Windows Service'
+                  inputs:
+                    Machines: '$(windowsVMDev)'
+                    UserName: '$(vmUserDev)'
+                    UserPassword: '$(vmPasswordDev)'
+                    InlineScript: |
+                      # Install NSSM (Non-Sucking Service Manager) if not exists
+                      if (!(Test-Path "C:\nssm\nssm.exe")) {
+                          Write-Host "Downloading NSSM..."
+                          $nssmUrl = "https://nssm.cc/release/nssm-2.24.zip"
+                          Invoke-WebRequest -Uri $nssmUrl -OutFile "C:\Temp\nssm.zip"
+                          Expand-Archive -Path "C:\Temp\nssm.zip" -DestinationPath "C:\Temp" -Force
+                          Move-Item -Path "C:\Temp\nssm-2.24\win64" -Destination "C:\nssm" -Force
+                      }
+
+                      $nssm = "C:\nssm\nssm.exe"
+                      $serviceName = "OBDInsightBotAPI"
+                      $pythonPath = (Get-Command python).Source
+                      $appPath = "C:\Apps\OBDInsightBot-API"
+
+                      # Remove existing service if it exists
+                      $service = Get-Service -Name $serviceName -ErrorAction SilentlyContinue
+                      if ($service) {
+                          & $nssm stop $serviceName
+                          & $nssm remove $serviceName confirm
+                          Write-Host "Removed existing service"
+                      }
+
+                      # Create new service
+                      & $nssm install $serviceName $pythonPath "-m" "uvicorn" "app.main:app" "--host" "0.0.0.0" "--port" "8000"
+                      & $nssm set $serviceName AppDirectory $appPath
+                      & $nssm set $serviceName DisplayName "OBD InsightBot API"
+                      & $nssm set $serviceName Description "FastAPI service for OBD InsightBot"
+                      & $nssm set $serviceName Start SERVICE_AUTO_START
+
+                      # Set environment variables
+                      & $nssm set $serviceName AppEnvironmentExtra "ENVIRONMENT=development"
+
+                      # Configure logging
+                      & $nssm set $serviceName AppStdout "$appPath\logs\api-stdout.log"
+                      & $nssm set $serviceName AppStderr "$appPath\logs\api-stderr.log"
+
+                      Write-Host "Service created successfully"
+
+                # Start the service
+                - task: PowerShellOnTargetMachines@3
+                  displayName: 'Start API service'
+                  inputs:
+                    Machines: '$(windowsVMDev)'
+                    UserName: '$(vmUserDev)'
+                    UserPassword: '$(vmPasswordDev)'
+                    InlineScript: |
+                      # Create logs directory
+                      $logsPath = "C:\Apps\OBDInsightBot-API\logs"
+                      if (!(Test-Path $logsPath)) {
+                          New-Item -Path $logsPath -ItemType Directory -Force
+                      }
+
+                      # Start service
+                      Start-Service -Name "OBDInsightBotAPI"
+                      Write-Host "Service started"
+
+                      # Wait for service to start
+                      Start-Sleep -Seconds 5
+
+                      # Check service status
+                      $service = Get-Service -Name "OBDInsightBotAPI"
+                      Write-Host "Service Status: $($service.Status)"
+
+                      # Test health endpoint
+                      try {
+                          $response = Invoke-WebRequest -Uri "http://localhost:8000/health" -UseBasicParsing
+                          Write-Host "Health check passed: $($response.StatusCode)"
+                      } catch {
+                          Write-Warning "Health check failed: $_"
+                          Write-Host "Check logs at C:\Apps\OBDInsightBot-API\logs\"
+                      }
+
+  - stage: Deploy_Production
+    displayName: 'Deploy to Production'
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: DeployProdWindows
+        displayName: 'Deploy to Production Windows VM'
+        environment: 'production-windows'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                # Download artifacts
+                - task: DownloadBuildArtifacts@1
+                  displayName: 'Download artifacts'
+                  inputs:
+                    buildType: 'current'
+                    downloadType: 'single'
+                    artifactName: 'api-drop'
+                    downloadPath: '$(System.ArtifactsDirectory)'
+
+                # Backup current deployment
+                - task: PowerShellOnTargetMachines@3
+                  displayName: 'Backup current deployment'
+                  inputs:
+                    Machines: '$(windowsVMProd)'
+                    UserName: '$(vmUserProd)'
+                    UserPassword: '$(vmPasswordProd)'
+                    InlineScript: |
+                      $deployPath = "C:\Apps\OBDInsightBot-API"
+                      $backupPath = "C:\Apps\OBDInsightBot-API-Backup-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
+
+                      if (Test-Path $deployPath) {
+                          Copy-Item -Path $deployPath -Destination $backupPath -Recurse
+                          Write-Host "Backup created at: $backupPath"
+                      }
+
+                # Stop the API service
+                - task: PowerShellOnTargetMachines@3
+                  displayName: 'Stop API service'
+                  inputs:
+                    Machines: '$(windowsVMProd)'
+                    UserName: '$(vmUserProd)'
+                    UserPassword: '$(vmPasswordProd)'
+                    InlineScript: |
+                      Stop-Service -Name "OBDInsightBotAPI" -Force
+                      Write-Host "Service stopped"
+
+                # Copy files to Windows VM
+                - task: WindowsMachineFileCopy@2
+                  displayName: 'Copy files to Windows VM'
+                  inputs:
+                    SourcePath: '$(System.ArtifactsDirectory)/api-drop/api-package.zip'
+                    MachineNames: '$(windowsVMProd)'
+                    AdminUserName: '$(vmUserProd)'
+                    AdminPassword: '$(vmPasswordProd)'
+                    TargetPath: 'C:\Temp'
+
+                # Extract and deploy
+                - task: PowerShellOnTargetMachines@3
+                  displayName: 'Extract and deploy API'
+                  inputs:
+                    Machines: '$(windowsVMProd)'
+                    UserName: '$(vmUserProd)'
+                    UserPassword: '$(vmPasswordProd)'
+                    InlineScript: |
+                      $deployPath = "C:\Apps\OBDInsightBot-API"
+                      Expand-Archive -Path "C:\Temp\api-package.zip" -DestinationPath $deployPath -Force
+
+                      cd $deployPath
+                      pip install -r requirements.txt
+                      Write-Host "Deployment complete"
+
+                # Start service and verify
+                - task: PowerShellOnTargetMachines@3
+                  displayName: 'Start and verify service'
+                  inputs:
+                    Machines: '$(windowsVMProd)'
+                    UserName: '$(vmUserProd)'
+                    UserPassword: '$(vmPasswordProd)'
+                    InlineScript: |
+                      Start-Service -Name "OBDInsightBotAPI"
+                      Start-Sleep -Seconds 10
+
+                      $service = Get-Service -Name "OBDInsightBotAPI"
+                      if ($service.Status -ne "Running") {
+                          Write-Error "Service failed to start!"
+                          exit 1
+                      }
+
+                      # Health check
+                      $response = Invoke-WebRequest -Uri "http://localhost:8000/health" -UseBasicParsing
+                      if ($response.StatusCode -ne 200) {
+                          Write-Error "Health check failed!"
+                          exit 1
+                      }
+
+                      Write-Host "Production deployment successful!"

@@ -1,0 +1,547 @@
+﻿@{
+    ViewData["Title"] = "Home";
+    Layout = "_HomeLayout";
+
+    List<BlogPost> thisBlogPosts = ViewBag.blogPosts as List<BlogPost> ?? new List<BlogPost>();
+}
+
+
+
+@if (ViewBag.dbConnected == false)
+{
+    <div style="
+        height: 100vh;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: #ffdddd;
+        color: #a30000;
+        text-align: center;
+        padding: 2rem;
+        ">
+        <i class="bi bi-exclamation-triangle" style="font-size:8rem;"></i>
+        <h1 style="
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            ">
+            Database Not Initialised
+        </h1>
+
+        <p style="
+            font-size: 1.5rem;
+            max-width: 800px;
+            font-weight: 600;
+            ">
+            This application cannot run because the database has not been created.
+            <br /><br />
+            Open the Package Manager Console and run:
+            <br />
+            <code style="font-size: 1.4rem; background: #fff0f0; padding: 0.3rem 0.6rem; border-radius: 4px;">
+                update-database
+            </code>
+        </p>
+    </div>
+}
+else
+{
+
+<!-- HERO SECTION -->
+<section class="container-fluid section-padding bg-dark-primary">
+    <div class="container">
+        <div class="row align-items-center">
+            <!-- LEFT CONTENT -->
+            <div class="col-lg-7">
+                <div class="badge-premium mb-4">
+                    <i class="fas fa-leaf me-2"></i>Sustainable Vehicle Intelligence
+                </div>
+                <div class="accent-line"></div>
+                <h1 class="text-display mb-4">
+                    Drive Smarter,<br />Repair Smarter
+                </h1>
+
+                <p class="text-body-lg mb-5" style="max-width:540px;">
+                    Transform your OBD-II diagnostic data into AI-powered insights that help you understand, maintain, and extend your vehicle's life.
+                </p>
+
+                <div class="d-flex flex-column flex-sm-row gap-3 mb-5">
+                    <a asp-controller="Chat" asp-action="Index" class="btn btn-premium btn-premium-primary">
+                        <i class="fas fa-comment-dots me-2"></i>Start Free Analysis
+                    </a>
+                    <a href="#features" class="btn btn-premium btn-premium-outline">
+                        <i class="fas fa-play-circle me-2"></i>How It Works
+                    </a>
+                </div>
+
+                <div class="d-flex flex-wrap gap-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-leaf text-success me-2"></i>
+                        <span class="text-body-lg" style="font-size: 0.875rem;">Reduce Automotive Waste</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-shield-alt text-primary me-2"></i>
+                        <span class="text-body-lg" style="font-size: 0.875rem;">Proactive Maintenance</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT ILLUSTRATION -->
+            <div class="col-lg-5 mt-5 mt-lg-0">
+                <div class="position-relative">
+                    <div class="hero-visual">
+                        <i class="fas fa-car"></i>
+                        <h5 class="text-white fw-bold mb-2">Sustainable Vehicle Report</h5>
+                        <p class="text-white opacity-75 mb-0">AI-powered analysis ready in seconds</p>
+                    </div>
+
+                    <!-- Floating badge -->
+                    <div class="floating-badge" style="top: -1rem; right: -1rem;">
+                        <small class="text-success d-block fw-semibold">Eco-Score</small>
+                        <span class="text-white fw-bold fs-5">+42%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES SECTION -->
+<section id="features" class="container-fluid section-padding bg-dark-secondary">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="text-label d-block mb-3">AI-POWERED FEATURES</span>
+            <div class="accent-line accent-line-center"></div>
+            <h2 class="text-heading mb-3">Understand & Maintain Your Vehicle</h2>
+            <p class="text-body-lg" style="max-width: 600px; margin: 0 auto;">
+                From diagnostic codes to sustainable repair recommendations
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <!-- FEATURE 1 -->
+            <div class="col-md-4">
+                <div class="card-premium h-100">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h4 class="text-subheading mb-3">Intelligent Diagnostics</h4>
+                    <p class="text-body-lg mb-4" style="font-size: 0.9375rem;">
+                        AI translates complex OBD-II codes into clear, actionable insights with prioritized repair suggestions.
+                    </p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check-circle"></i>Plain English explanations</li>
+                        <li><i class="fas fa-check-circle"></i>Repair vs. replace guidance</li>
+                        <li><i class="fas fa-check-circle"></i>Cost-benefit analysis</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- FEATURE 2 -->
+            <div class="col-md-4">
+                <div class="card-premium h-100">
+                    <div class="feature-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <h4 class="text-subheading mb-3">Eco-Conscious Guidance</h4>
+                    <p class="text-body-lg mb-4" style="font-size: 0.9375rem;">
+                        Get recommendations that prioritize repairability, part longevity, and environmental impact.
+                    </p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-recycle"></i>Waste reduction strategies</li>
+                        <li><i class="fas fa-bolt"></i>Efficiency optimization</li>
+                        <li><i class="fas fa-chart-line"></i>Sustainability scoring</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- FEATURE 3 -->
+            <div class="col-md-4">
+                <div class="card-premium h-100">
+                    <div class="feature-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h4 class="text-subheading mb-3">Interactive Vehicle Chat</h4>
+                    <p class="text-body-lg mb-4" style="font-size: 0.9375rem;">
+                        Have a natural conversation about your vehicle's health in everyday language.
+                    </p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-question-circle"></i>No technical knowledge needed</li>
+                        <li><i class="fas fa-history"></i>Context-aware conversations</li>
+                        <li><i class="fas fa-lightbulb"></i>Proactive maintenance alerts</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="container-fluid section-padding bg-dark-primary">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="text-label d-block mb-3">HOW IT WORKS</span>
+            <div class="accent-line accent-line-center"></div>
+            <h2 class="text-heading mb-3">Simple Three-Step Process</h2>
+            <p class="text-body-lg">From data to sustainable insights in minutes</p>
+        </div>
+
+        <div class="row g-5">
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="step-circle">
+                        <span>1</span>
+                    </div>
+                    <h5 class="text-subheading mb-3">Upload OBD-II Data</h5>
+                    <p class="text-body-lg" style="font-size: 0.9375rem;">Export CSV from any OBD-II scanner and upload directly to our secure platform.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="step-circle">
+                        <span>2</span>
+                    </div>
+                    <h5 class="text-subheading mb-3">AI Analysis & Insights</h5>
+                    <p class="text-body-lg" style="font-size: 0.9375rem;">Our Granite AI analyzes the data, identifying issues and sustainable solutions.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="step-circle">
+                        <span>3</span>
+                    </div>
+                    <h5 class="text-subheading mb-3">Chat & Take Action</h5>
+                    <p class="text-body-lg" style="font-size: 0.9375rem;">Discuss findings, ask questions, and get actionable repair recommendations.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA SECTION -->
+<section class="container-fluid section-padding bg-dark-secondary">
+    <div class="container">
+        <div class="cta-box text-center">
+            <span class="text-label d-block mb-3">GET STARTED</span>
+            <div class="accent-line accent-line-center"></div>
+            <h2 class="text-heading mb-4">Ready to Drive More Sustainably?</h2>
+            <p class="text-body-lg mb-5" style="max-width: 560px; margin-left: auto; margin-right: auto;">
+                Join vehicle owners making smarter, eco-friendly maintenance decisions.
+            </p>
+            <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center mb-4">
+                <a asp-controller="Chat" asp-action="Index" class="btn btn-premium btn-premium-primary">
+                    <i class="fas fa-upload me-2"></i>Upload & Analyze Now
+                </a>
+                <a asp-controller="Help" asp-action="Example" class="btn btn-premium btn-premium-outline">
+                    <i class="fas fa-book me-2"></i>View Sample Report
+                </a>
+            </div>
+            <p class="text-body-lg mb-0" style="font-size: 0.8125rem;">
+                <i class="fas fa-lock me-1"></i>Secure & Private  •  GDPR Compliant
+            </p>
+        </div>
+    </div>
+</section>
+
+    <!-- HOW IT WORKS -->
+    <section class="container-fluid section-padding bg-dark-primary">
+        <div class="container">
+            <div class="text-center mb-5">
+                <span class="text-label d-block mb-3"> Continuing to drive us to a more sustainable repairs industry.</span>
+                <div class="accent-line accent-line-center"></div>
+                <h2 class="text-heading mb-3">RECENT NEWS AND UPDATES</h2>
+                <p class="text-body-lg">OBD Inisight bot | University of Hull | IBM</p>
+            </div>
+
+            <style>
+                .hero-card {
+                    min-height: 90vh;
+                    padding: 45px;
+                    border-radius: 18px;
+                    display: flex;
+                    align-items: flex-end;
+                    justify-content: space-between;
+                    background-image: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.25) 40%, rgba(0,0,0,0) 75%), url('/branding/Blog/BlogImage.png');
+                    background-size: cover;
+                    background-position: center;
+                    background-repeat: no-repeat;
+                    color: #fff;
+                }
+
+                    .hero-card p {
+                        margin-bottom: 0;
+                        max-width: 70ch;
+                    }
+
+                .blog-card {
+                    height: 320px;
+                    padding: 28px;
+                    border-radius: 18px;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
+                    background-size: cover;
+                    background-position: center;
+                    background-repeat: no-repeat;
+                    color: #fff;
+                    overflow: hidden;
+                }
+
+                    .blog-card p {
+                        margin-bottom: 0;
+                        max-width: 70ch;
+                        display: -webkit-box;
+                        -webkit-line-clamp: 3;
+                        -webkit-box-orient: vertical;
+                        overflow: hidden;
+                    }
+
+                    .blog-card a {
+                        color: white;
+                    }
+
+                    .blog-card svg {
+                        color: white;
+                        transition: transform 0.2s;
+                    }
+
+                    .blog-card:hover svg {
+                        transform: translateX(4px);
+                    }
+
+                .blog-post-row {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 1rem 0.75rem;
+                    border-bottom: 1px solid var(--border-color, #2a2a2a);
+                    border-radius: 6px;
+                    transition: background 0.15s;
+                    text-decoration: none;
+                    color: inherit;
+                }
+
+                    .blog-post-row:hover {
+                        background: rgba(255,255,255,0.04);
+                    }
+
+                    .blog-post-row svg {
+                        flex-shrink: 0;
+                        color: white;
+                        transition: transform 0.2s;
+                    }
+
+                    .blog-post-row:hover svg {
+                        transform: translateX(4px);
+                    }
+
+                .Side-Image-card {
+                    min-height: 75vh;
+                    border-radius: 18px;
+                    background-image: url('/branding/Blog/InTheWoods.png');
+                    background-size: cover;
+                    background-position: left;
+                    background-repeat: no-repeat;
+                    overflow: hidden;
+                }
+
+                .sticky-left {
+                    position: sticky;
+                    top: 1rem;
+                    align-self: flex-start;
+                }
+
+                .section-label-group {
+                    margin-bottom: 1.5rem;
+                }
+            </style>
+
+
+            @if (thisBlogPosts.Count != 0 )
+            {
+
+                <div class="row g-5">
+                @{
+                    int c = 0;
+                }
+                    @foreach (BlogPost blogPost in thisBlogPosts)
+                    {
+                        if(c <= 2)
+                        {
+
+
+                            <div class="col-12 col-md-4">
+                                <div class="blog-card shadow"
+                                     style="background-image:
+                                    linear-gradient(to bottom, rgba(0,0,0,0.70) 0%, rgba(0,0,0,0.30) 50%, rgba(0,0,0,0.60) 100%),
+                                    url('@(blogPost.PathForFeaturedImage ?? "/branding/Blog/BlogImage.png")');">
+                                    <div>
+                                        <h3 style="font-weight:900; font-size: 1.25rem;">@blogPost.Title</h3>
+                                        <p>@blogPost.MiniDescription</p>
+                                    </div>
+                                    <div class="d-flex justify-content-end">
+                                        <a asp-action="Article" asp-route-Id="@blogPost.Id">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-arrow-right-circle-fill" viewBox="0 0 16 16">
+                                                <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0M4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5z" />
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            c = c + 1;
+                        }
+
+                
+                    }
+                
+                </div>
+            }
+
+            else
+            {
+                <p> No Blog Posts currently available.</p>
+            }
+        </div>
+    </section>
+
+
+<!-- FOOTER -->
+    <footer class="container-fluid section-padding-sm bg-dark-primary footer-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <div class="d-flex align-items-center">
+                        <div class="feature-icon me-3" style="width: 40px; height: 40px; margin-bottom: 0;">
+                            <i class="fas fa-car" style="font-size: 1rem;"></i>
+                        </div>
+                        <div>
+                            <span class="text-white fw-semibold d-block" style="font-size: 0.875rem;">Vehicle Intelligence Platform</span>
+                            <span class="text-body-lg" style="font-size: 0.8125rem;">Powered by IBM Granite AI</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="text-body-lg mb-1" style="font-size: 0.8125rem;">
+                        University Of Hull CPD Project for IBM.
+                    </p>
+                    <p class="text-body-lg mb-0" style="font-size: 0.8125rem;">
+                        By using this platform, you agree to our <a asp-controller="home" asp-action="Privacy" class="text-primary text-decoration-none">Terms</a>
+                        and <a asp-controller="home" asp-action="Privacy" class="text-primary text-decoration-none">Privacy Policy</a> <a asp-controller="Blogs" asp-action="Admin" class="text-primary text-decoration-none">Manage</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    /* Override Bootstrap primary button */
+    .btn-primary {
+        background-color: #0f62fe;
+        border-color: #0f62fe;
+    }
+    .btn-primary:hover {
+        background-color: #0353e9;
+        border-color: #0353e9;
+    }
+
+    /* Footer section */
+    .footer-section {
+        border-top: 1px solid var(--border-color, #2a2a2a);
+    }
+
+    /* Light theme text adjustments */
+    [data-theme="light"] .text-display,
+    [data-theme="light"] .text-heading,
+    [data-theme="light"] .text-subheading {
+        color: var(--text-primary);
+    }
+
+    [data-theme="light"] .text-body-lg {
+        color: var(--text-secondary);
+    }
+
+    [data-theme="light"] .text-label {
+        color: var(--accent-primary);
+    }
+
+    /* Light theme card premium */
+    [data-theme="light"] .card-premium {
+        background: var(--bg-elevated);
+        border-color: var(--border-color);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    [data-theme="light"] .card-premium:hover {
+        border-color: var(--accent-primary);
+        box-shadow: 0 2px 8px rgba(15, 98, 254, 0.15);
+    }
+
+    /* Light theme feature icon */
+    [data-theme="light"] .feature-icon {
+        background-color: rgba(15, 98, 254, 0.1);
+    }
+
+    /* Light theme feature list */
+    [data-theme="light"] .feature-list li {
+        color: var(--text-secondary);
+    }
+
+    /* Light theme step circle */
+    [data-theme="light"] .step-circle {
+        background-color: var(--accent-primary);
+        color: #ffffff;
+    }
+
+    /* Light theme CTA box */
+    [data-theme="light"] .cta-box {
+        background-color: var(--bg-elevated);
+        border-color: var(--border-color);
+    }
+
+    /* Light theme floating badge */
+    [data-theme="light"] .floating-badge {
+        background-color: var(--bg-elevated);
+        border-color: var(--border-color);
+    }
+
+    [data-theme="light"] .floating-badge .text-white {
+        color: var(--text-primary) !important;
+    }
+
+    /* Light theme badge premium */
+    [data-theme="light"] .badge-premium {
+        background-color: rgba(15, 98, 254, 0.1);
+        color: var(--accent-primary);
+    }
+
+    /* Light theme hero visual */
+    [data-theme="light"] .hero-visual {
+        background: linear-gradient(135deg, #e8f0fe 0%, #d2e3fc 100%);
+        border-color: var(--border-color);
+    }
+
+    [data-theme="light"] .hero-visual i {
+        color: var(--accent-primary);
+    }
+
+    [data-theme="light"] .hero-visual h5,
+    [data-theme="light"] .hero-visual p {
+        color: var(--text-primary) !important;
+    }
+
+    [data-theme="light"] .hero-visual p {
+        opacity: 0.8 !important;
+    }
+
+    /* Light theme footer */
+    [data-theme="light"] .footer-section {
+        border-top-color: var(--border-color);
+    }
+</style>
+}

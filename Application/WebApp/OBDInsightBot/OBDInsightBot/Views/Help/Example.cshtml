@@ -1,0 +1,174 @@
+@{
+    Layout = "_ChatLayout";
+    ViewData["Title"] = "Example Conversation";
+}
+
+<div class="container py-4">
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="text-heading text-white mb-3">Example Conversation</h1>
+        <div class="accent-line accent-line-center"></div>
+        <p class="text-body-lg" style="color: #c6c6c6; max-width: 600px; margin: 0 auto;">
+            See how OBD Insight Bot can help you understand your vehicle's health
+        </p>
+    </div>
+
+    <!-- Chat Mockup -->
+    <div class="card-premium p-4 mx-auto" style="max-width: 720px;">
+
+        <!-- Sample Vehicle Banner -->
+        <div class="sample-banner mb-4">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-car-front-fill" style="color: #0f62fe;"></i>
+                <span style="color: #a8a8a8; font-size: 0.875rem;">
+                    Sample Data: 2019 Honda Civic - 45,230 miles
+                </span>
+            </div>
+        </div>
+
+        <!-- Chat Messages -->
+        <div class="example-chat">
+
+            <!-- Bot greeting -->
+            <div class="message-row bot-row">
+                <div class="bot-avatar">
+                    <i class="bi bi-robot"></i>
+                </div>
+                <div class="message-bubble bot-bubble">
+                    Hello! I've analyzed your OBD-II data. How can I help you today?
+                </div>
+            </div>
+
+            <!-- User question 1 -->
+            <div class="message-row user-row">
+                <div class="message-bubble user-bubble">
+                    What does error code P0420 mean?
+                </div>
+            </div>
+
+            <!-- Bot response 1 -->
+            <div class="message-row bot-row">
+                <div class="bot-avatar">
+                    <i class="bi bi-robot"></i>
+                </div>
+                <div class="message-bubble bot-bubble">
+                    <strong>P0420 - Catalyst System Efficiency Below Threshold</strong><br><br>
+                    This code indicates your catalytic converter may not be working efficiently. Common causes include:
+                    <ul class="mt-2 mb-2" style="padding-left: 1.25rem;">
+                        <li>Failing catalytic converter</li>
+                        <li>Faulty oxygen sensors</li>
+                        <li>Engine misfire causing damage</li>
+                        <li>Exhaust leaks</li>
+                    </ul>
+                    <strong>Severity:</strong> Moderate - Your vehicle will still run, but emissions will be higher and you may fail inspection.<br><br>
+                    <strong>Recommended action:</strong> Have a mechanic inspect the oxygen sensor readings and catalytic converter condition.
+                </div>
+            </div>
+
+            <!-- User question 2 -->
+            <div class="message-row user-row">
+                <div class="message-bubble user-bubble">
+                    How urgent is this repair?
+                </div>
+            </div>
+
+            <!-- Bot response 2 -->
+            <div class="message-row bot-row">
+                <div class="bot-avatar">
+                    <i class="bi bi-robot"></i>
+                </div>
+                <div class="message-bubble bot-bubble">
+                    Based on your data, this isn't immediately urgent, but I recommend addressing it within the next <strong>2-4 weeks</strong>.<br><br>
+                    Here's why:
+                    <ul class="mt-2 mb-2" style="padding-left: 1.25rem;">
+                        <li>Your engine is running normally otherwise</li>
+                        <li>No signs of overheating or misfires</li>
+                        <li>Fuel economy may decrease 10-15%</li>
+                    </ul>
+                    Estimated repair cost: <strong>$150-$2,500</strong> depending on whether it's just an oxygen sensor or the full catalytic converter.
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- CTA -->
+    <div class="text-center mt-5">
+        <p class="text-body-lg mb-4" style="color: #c6c6c6;">
+            Ready to analyze your own vehicle data?
+        </p>
+        <a asp-controller="Chat" asp-action="Index" class="btn btn-premium btn-premium-primary">
+            <i class="bi bi-upload me-2"></i>Upload Your Data
+        </a>
+    </div>
+</div>
+
+<style>
+    .sample-banner {
+        padding: 0.75rem 1rem;
+        background-color: rgba(15, 98, 254, 0.1);
+        border: 1px solid rgba(15, 98, 254, 0.3);
+        border-radius: 8px;
+    }
+
+    .example-chat {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .message-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .bot-row {
+        justify-content: flex-start;
+    }
+
+    .user-row {
+        justify-content: flex-end;
+    }
+
+    .bot-avatar {
+        background-color: #0f62fe;
+        flex-shrink: 0;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        min-height: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #ffffff;
+        font-size: 1.125rem;
+    }
+
+    .message-bubble {
+        padding: 1rem 1.25rem;
+        max-width: 80%;
+        line-height: 1.6;
+        font-size: 0.9375rem;
+    }
+
+    .bot-bubble {
+        background-color: #262626;
+        border: 1px solid #3a3a3a;
+        border-radius: 4px 16px 16px 16px;
+        color: #e0e0e0;
+    }
+
+    .user-bubble {
+        background-color: #0f62fe;
+        border-radius: 16px 4px 16px 16px;
+        color: #ffffff;
+    }
+
+    .accent-line-center {
+        margin-left: auto;
+        margin-right: auto;
+    }
+</style>

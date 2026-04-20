@@ -1,0 +1,178 @@
+﻿@{
+    Layout = "_ChatLayout";
+    ViewData["Title"] = "Welcome to OBD Insight BOT";
+
+}
+
+@model UserSession
+
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-warning">
+        @ViewBag.Message
+    </div>
+}
+
+<!-- HERO SECTION -->
+<section class="container-fluid py-5">
+    <div class="container p-5 hero-container">
+        <div class="row align-items-center">
+            <!-- LEFT CONTENT -->
+            <div class="col-md-7">
+                <h1 class="text-heading fw-normal mb-3" style="line-height:1.2; font-size: 2.5rem;">
+                    Understand your vehicle<br />like never before
+                </h1>
+
+                <p class="text-body-lg mb-4" style="max-width:480px;">
+                    Upload your OBD-II diagnostic data and get instant AI-powered insights
+                    about your vehicle's health, issues, and recommendations.
+                </p>
+
+                <div class="d-flex gap-3 flex-wrap">
+
+                    <!-- FILE UPLOAD FORM -->
+                    <form asp-action="UploadFile"
+                          asp-controller="Chat"
+                          method="post"
+                          enctype="multipart/form-data"
+                          class="d-inline-block">
+
+                        <input type="hidden" name="SessionID" value="@Model.Id" />
+
+                        <label class="btn btn-premium btn-premium-primary mb-0">
+                            Upload Data
+                            <input type="file"
+                                   name="file"
+                                   accept=".csv"
+                                   hidden
+                                   onchange="this.form.submit()" />
+                        </label>
+                    </form>
+
+                    <!-- MANUAL ENTRY BUTTON -->
+                    <a asp-controller="Chat"
+                       asp-action="ManualEntry"
+                       asp-route-SessionID="@Model.Id"
+                       class="btn btn-premium btn-premium-primary">
+                        Input Data Manually
+                    </a>
+
+                </div>
+
+                @if (Model.UploadedDataPath != null && Model.UploadedDataPath != "")
+                {
+                    <span class="badge bg-success mt-3 d-inline-block">
+                        <i class="bi bi-check-circle me-1"></i> File uploaded
+                    </span>
+                }
+            </div>
+
+            <!-- RIGHT ICON -->
+            <div class="col-md-5 d-none d-md-flex justify-content-end">
+                <div class="rounded-circle d-flex align-items-center justify-content-center"
+                     style="width:160px;height:160px;background-color:#0f62fe;">
+                    <span style="font-size:80px;color:white;"><i class="bi bi-car-front-fill"></i></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES SECTION -->
+<section class="container py-5">
+    <div class="mb-4">
+        <small class="text-primary fw-bold" style="letter-spacing:2px;">FEATURES</small>
+        <h3 class="text-heading" style="font-size: 1.5rem;">What you can do</h3>
+    </div>
+
+    <div class="row g-4">
+        <!-- FEATURE 1 -->
+        <div class="col-md-4">
+            <div class="feature-card h-100">
+                <div class="mb-3">
+                    <span class="badge rounded-circle bg-primary p-3 fs-4"><i class="bi bi-lightbulb"></i></span>
+                </div>
+                <h5 class="text-subheading">Smart Insights</h5>
+                <p class="text-body-lg" style="font-size: 0.9rem;">
+                    Get AI-powered analysis that explains diagnostic codes in plain language
+                    and suggests actionable fixes.
+                </p>
+            </div>
+        </div>
+
+        <!-- FEATURE 2 -->
+        <div class="col-md-4">
+            <div class="feature-card h-100">
+                <div class="mb-3">
+                    <span class="badge rounded-circle bg-primary p-3 fs-4"><i class="bi bi-car-front-fill"></i></span>
+                </div>
+                <h5 class="text-subheading">OBD-II Compatible</h5>
+                <p class="text-body-lg" style="font-size: 0.9rem;">
+                    Works with CSV exports from any standard OBD-II scanner.
+                    Simply upload and start asking questions.
+                </p>
+            </div>
+        </div>
+
+        <!-- FEATURE 3 -->
+        <div class="col-md-4">
+            <div class="feature-card h-100">
+                <div class="mb-3">
+                    <span class="badge rounded-circle bg-primary p-3 fs-4"><i class="bi bi-chat"></i></span>
+                </div>
+                <h5 class="text-subheading">Natural Conversation</h5>
+                <p class="text-body-lg" style="font-size: 0.9rem;">
+                    No technical jargon needed.
+                    Ask questions about your vehicle in everyday language.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="container py-4 d-flex justify-content-between">
+    <small class="text-muted">
+        Powered by IBM Granite AI
+    </small>
+    <small class="text-muted">
+        By using this chatbot, you agree to our Terms of Service
+    </small>
+</footer>
+
+<style>
+    .hero-container {
+        background-color: var(--bg-elevated, #161616);
+        border: 1px solid var(--border-color-strong, #525252);
+        border-radius: 25px;
+    }
+
+    .feature-card {
+        padding: 1.5rem;
+        background-color: var(--bg-elevated, #1a1a1a);
+        border: 1px solid var(--border-color-strong, #525252);
+        border-radius: 16px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .feature-card:hover {
+        border-color: var(--accent-primary, #0f62fe);
+        box-shadow: 0 0 0 1px var(--accent-primary, #0f62fe);
+    }
+
+    /* Light theme adjustments */
+    [data-theme="light"] .hero-container {
+        background-color: var(--bg-elevated);
+        border-color: var(--border-color-strong);
+    }
+
+    [data-theme="light"] .feature-card {
+        background-color: var(--bg-elevated);
+        border-color: var(--border-color-strong);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    [data-theme="light"] .feature-card:hover {
+        box-shadow: 0 2px 8px rgba(15, 98, 254, 0.15);
+    }
+</style>

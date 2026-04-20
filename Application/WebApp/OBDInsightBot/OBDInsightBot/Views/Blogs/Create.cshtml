@@ -1,0 +1,99 @@
+﻿@model OBDInsightBot.Models.BlogPost
+
+@{
+    ViewData["Title"] = "Create Post";
+    Layout = "_ChatLayout";
+}
+
+<style>
+    h1, h2, h4 { color: var(--text-primary, #ffffff); }
+    hr { border-color: var(--border-color, #2a2a2a); }
+    .form-control, .form-select { background-color: var(--bg-surface, #262626); color: var(--text-primary, #ffffff); border-color: var(--border-color, #2a2a2a); }
+    .form-control:focus, .form-select:focus { background-color: var(--bg-surface, #262626); color: var(--text-primary, #ffffff); border-color: var(--accent-primary, #0f62fe); box-shadow: 0 0 0 2px rgba(15,98,254,0.25); }
+    .form-control::placeholder { color: var(--text-subtle, #6f6f6f); }
+    .form-label, .control-label { color: var(--text-secondary, #c6c6c6); display: block; margin-bottom: 0.375rem; }
+    .text-muted { color: var(--text-muted, #a8a8a8) !important; }
+    .text-danger { color: var(--accent-danger, #fa4d56) !important; }
+    a { color: var(--accent-primary, #0f62fe); }
+    a:hover { color: #6ea6ff; }
+    .btn-primary { background-color: var(--accent-primary, #0f62fe); border-color: var(--accent-primary, #0f62fe); }
+    .btn-primary:hover { background-color: #0353e9; border-color: #0353e9; }
+    .form-check-label { color: var(--text-secondary, #c6c6c6); }
+</style>
+
+<h1>Create Post</h1>
+
+<h4>BlogPost</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        
+<form asp-action="Create" method="post" class="mt-3">
+    @Html.AntiForgeryToken()
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <!-- ID: Do NOT display. Generate server-side (Guid.NewGuid()) -->
+    <!-- If you REALLY need it posted back, use hidden input. Usually not needed. -->
+    @* <input asp-for="Id" type="hidden" /> *@
+
+    <div class="mb-3">
+        <label asp-for="WrittenAt" class="form-label"></label>
+        <input asp-for="WrittenAt" class="form-control" type="datetime-local" />
+        <span asp-validation-for="WrittenAt" class="text-danger"></span>
+        <small class="text-muted">When the post was written (defaults to now if left unchanged).</small>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="MiniDescription" class="form-label"></label>
+        <textarea asp-for="MiniDescription" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="MiniDescription" class="text-danger"></span>
+        <small class="text-muted">Keep this short (e.g., summary/preview).</small>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Content" class="form-label"></label>
+        <textarea asp-for="Content" class="form-control" rows="8"></textarea>
+        <span asp-validation-for="Content" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="PostedAt" class="form-label"></label>
+        <input asp-for="PostedAt" class="form-control" type="datetime-local" />
+        <span asp-validation-for="PostedAt" class="text-danger"></span>
+        <small class="text-muted">When it should go live. Leave blank if you set this in code.</small>
+    </div>
+
+    <div class="form-check mb-3">
+        <input class="form-check-input" asp-for="IsHidden" />
+        <label class="form-check-label" asp-for="IsHidden"></label>
+        <span asp-validation-for="IsHidden" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="PathForFeaturedImage" class="form-label"></label>
+        <input asp-for="PathForFeaturedImage" class="form-control" />
+        <span asp-validation-for="PathForFeaturedImage" class="text-danger"></span>
+        <small class="text-muted">Provide an image URL or relative path.</small>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+</form>
+
+
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
