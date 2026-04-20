@@ -5,6 +5,8 @@ By uploading a vehicle’s OBD (On‑Board Diagnostics) data, users can interact
 
 [Find out more](OBDInisghtBot_Overview.pdf)
 
+## Deployment 
+Instructions for deployment can be found [here](HowToDeploy.md)
 
 _This project will not be accepting external contributions_
 
